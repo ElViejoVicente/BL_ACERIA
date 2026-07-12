@@ -1,0 +1,326 @@
+@using GPX.Web.Services
+@using System.Security.Claims
+@inherits LayoutComponentBase
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ThemeManager ThemeManager
+@inject SizeModeManager SizeModeManager
+@inject CascadingValueSource<SizeMode> SizeModeSource
+@inject ModuleAccessService ModuleAccessService
+@inject BrandingService BrandingService
+
+<PageTitle>@($"GPX - {CurrentModule} | DevExpress")</PageTitle>
+
+<div class="page">
+    <header class="header">
+        <div class="content header-content">
+            <AuthorizeView Context="authorizeContext">
+                @{
+                    var userName = authorizeContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+                    var email = authorizeContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                    var profile = authorizeContext.User.Claims.FirstOrDefault(c => c.Type == AppClaimTypes.Profile)?.Value;
+                }
+                @if(BrandingService.ShowHamburgerMenu) {
+                    <DxToolbar CssClass="toolbar" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                        <Items>
+                            <DxToolbarItem IconCssClass="hamburger-icon icon medium-icon"
+                                           Click="@(() => IsSideMenuOpen = !IsSideMenuOpen)"
+                                           Tooltip="Mostrar u ocultar menu lateral" />
+                            <DxToolbarItem>
+                                <Template>
+                                    <div class="custom-item brand-shell">
+                                        <img class="group-brand-logo" src="@BrandingService.GetGroupLogoPath(ThemeManager.IsDarkTheme)" alt="@BrandingService.Current.GroupName" />
+                                        <span class="brand-badge">@BrandingService.BrandCaption</span>
+                                    </div>
+                                </Template>
+                            </DxToolbarItem>
+                            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                           Name="SizeMode"
+                                           Text="@(GetSizeModeDescriptor().Text)"
+                                           AdaptiveText="Tamaño"
+                                           Tooltip="Cambiar el tamaño de la interfaz.">
+                                <Items>
+                                    <DxToolbarItem Name="@(GetSizeModeDescriptor(SizeMode.Small).Name)" Click="OnSizeModeChanged" Text="@(GetSizeModeDescriptor(SizeMode.Small).Text)" />
+                                    <DxToolbarItem Name="@(GetSizeModeDescriptor(SizeMode.Medium).Name)" Click="OnSizeModeChanged" Text="@(GetSizeModeDescriptor(SizeMode.Medium).Text)" />
+                                    <DxToolbarItem Name="@(GetSizeModeDescriptor(SizeMode.Large).Name)" Click="OnSizeModeChanged" Text="@(GetSizeModeDescriptor(SizeMode.Large).Text)" />
+                                </Items>
+                            </DxToolbarItem>
+                            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                           Click="OnThemeChanged"
+                                           IconCssClass="@GetThemeSwitcherIconCssClasses()"
+                                           AdaptiveText="@ThemeManager.CurrentColorMode"
+                                           Tooltip="@($"Modo actual: {(ThemeManager.IsDarkTheme ? "Oscuro" : "Claro")}")" />
+                            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                           CssClass="current-user-item"
+                                           Click="@(_ => ShowUserInfo = !ShowUserInfo)"
+                                           AdaptiveText="@userName"
+                                           Tooltip="Información del usuario actual">
+                                <Template>
+                                    <div class="avatar-item">
+                                        <UserAvatar Src="images/users/01.png" CssClass="avatar" AltText="@userName" />
+                                        @if(context.HiddenToAdaptiveMenu) {
+                                            <div class="avatar-label">@context.AdaptiveText</div>
+                                        }
+                                    </div>
+                                </Template>
+                            </DxToolbarItem>
+                        </Items>
+                    </DxToolbar>
+                } else {
+                    <div class="header-shell">
+                        <div class="header-left">
+                            <div class="brand-shell">
+                                <img class="group-brand-logo" src="@BrandingService.GetGroupLogoPath(ThemeManager.IsDarkTheme)" alt="@BrandingService.Current.GroupName" />
+                                <span class="brand-badge">@BrandingService.BrandCaption</span>
+                            </div>
+                            <DxMenu CssClass="header-navigation-menu"
+                                    Data="@HeaderMenuItems"
+                                    Orientation="Orientation.Horizontal"
+                                    DisplayMode="MenuDisplayMode.Desktop"
+                                    CollapseItemsToHamburgerMenu="false"
+                                    ItemWrapMode="MenuItemWrapMode.NoWrap">
+                                <DataMappings>
+                                    <DxMenuDataMapping Key="@(nameof(HeaderMenuItem.Key))"
+                                                       ParentKey="@(nameof(HeaderMenuItem.ParentKey))"
+                                                       Text="@(nameof(HeaderMenuItem.Text))"
+                                                       NavigateUrl="@(nameof(HeaderMenuItem.NavigateUrl))"
+                                                       IconCssClass="@(nameof(HeaderMenuItem.IconCssClass))"
+                                                       CssClass="@(nameof(HeaderMenuItem.CssClass))"
+                                                       BeginGroup="@(nameof(HeaderMenuItem.BeginGroup))"
+                                                       Visible="@(nameof(HeaderMenuItem.Visible))" />
+                                </DataMappings>
+                            </DxMenu>
+                        </div>
+                        <DxToolbar CssClass="toolbar toolbar-right" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                            <Items>
+                                <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                               Name="SizeMode"
+                                               Text="@(GetSizeModeDescriptor().Text)"
+                                               AdaptiveText="Tamaño"
+                                               Tooltip="Cambiar el tamaño de la interfaz.">
+                                    <Items>
+                                        <DxToolbarItem Name="@(GetSizeModeDescriptor(SizeMode.Small).Name)" Click="OnSizeModeChanged" Text="@(GetSizeModeDescriptor(SizeMode.Small).Text)" />
+                                        <DxToolbarItem Name="@(GetSizeModeDescriptor(SizeMode.Medium).Name)" Click="OnSizeModeChanged" Text="@(GetSizeModeDescriptor(SizeMode.Medium).Text)" />
+                                        <DxToolbarItem Name="@(GetSizeModeDescriptor(SizeMode.Large).Name)" Click="OnSizeModeChanged" Text="@(GetSizeModeDescriptor(SizeMode.Large).Text)" />
+                                    </Items>
+                                </DxToolbarItem>
+                                <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                               Click="OnThemeChanged"
+                                               IconCssClass="@GetThemeSwitcherIconCssClasses()"
+                                               AdaptiveText="@ThemeManager.CurrentColorMode"
+                                               Tooltip="@($"Modo actual: {(ThemeManager.IsDarkTheme ? "Oscuro" : "Claro")}")" />
+                                <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                               CssClass="current-user-item"
+                                               Click="@(_ => ShowUserInfo = !ShowUserInfo)"
+                                               AdaptiveText="@userName"
+                                               Tooltip="Información del usuario actual">
+                                    <Template>
+                                        <div class="avatar-item">
+                                            <UserAvatar Src="images/users/01.png" CssClass="avatar" AltText="@userName" />
+                                            @if(context.HiddenToAdaptiveMenu) {
+                                                <div class="avatar-label">@context.AdaptiveText</div>
+                                            }
+                                        </div>
+                                    </Template>
+                                </DxToolbarItem>
+                            </Items>
+                        </DxToolbar>
+                    </div>
+                }
+                <DxDropDown PositionTarget=":not(div).current-user-item:not([style*='display: none'])" @bind-IsOpen="@ShowUserInfo" PositionMode="DropDownPositionMode.Bottom">
+                    <BodyContentTemplate>
+                        <AccountManager DisplayName="@userName" Email="@email" ProfileName="@profile" AvatarSrc="images/users/01.png" />
+                    </BodyContentTemplate>
+                </DxDropDown>
+            </AuthorizeView>
+        </div>
+    </header>
+    <main class="main">
+        <div class="content main-content">
+            <DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium | DeviceSize.Large" IsActive="IsSmallScreen" IsActiveChanged="OnScreenSizeChanged" />
+            @if(BrandingService.ShowHamburgerMenu) {
+                <DxDrawer CssClass="main-menu-drawer"
+                          @bind-IsOpen="IsSideMenuOpen"
+                          Mode="@SideMenuMode"
+                          Position="DrawerPosition.Left"
+                          ZIndex="102"
+                          PanelWidth="17rem">
+                    <BodyTemplate>
+                        <DxTreeView AllowSelectNodes="true"
+                                    SelectionChanged="@(e => CurrentModule = e.NodeInfo?.Text ?? CurrentModule)"
+                                    NodeExpandCollapseAction="TreeViewNodeExpandCollapseAction.NodeClick"
+                                    AnimationType="LayoutAnimationType.Slide"
+                                    ShowFilterPanel="false"
+                                    TextWrapEnabled="true"
+                                    CssClass="main-menu">
+                            <Nodes>
+                                @if(ModuleAccessService.ShowHomePage) {
+                                    <DxTreeViewNode Text="Inicio" NavigateUrl="/" IconCssClass="crm-icon icon medium-icon" />
+                                }
+                                @foreach(var group in VisibleModuleGroups) {
+                                    <DxTreeViewNode Text="@group.Group.Name"
+                                                    AllowSelection="false"
+                                                    Expanded="true"
+                                                    IconCssClass="@group.Group.IconCssClass">
+                                        <Nodes>
+                                            @foreach(var module in group.Modules) {
+                                                <DxTreeViewNode Text="@module.Name" NavigateUrl="@module.Route" IconCssClass="@module.IconCssClass" />
+                                            }
+                                        </Nodes>
+                                    </DxTreeViewNode>
+                                }
+                            </Nodes>
+                        </DxTreeView>
+                    </BodyTemplate>
+                    <TargetContent>
+                        <div class="module-content" >
+                            @Body
+                        </div>
+                    </TargetContent>
+                </DxDrawer>
+            } else {
+                <div class="module-content module-content-full">
+                    @Body
+                </div>
+            }
+        </div>
+
+
+        <DxDialogProvider  />
+        <DxToastProvider MaxToastCount="2"
+                         HorizontalAlignment="HorizontalAlignment.Right"
+                         VerticalAlignment="VerticalEdge.Bottom"
+                         ShowCloseButton="true" />
+    </main>
+</div>
+
+@code {
+    IDisposable? locationChangeSubscription;
+
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+
+    bool IsSmallScreen { get; set; }
+    bool IsSideMenuOpen { get; set; } = true;
+    DrawerMode SideMenuMode { get; set; } = DrawerMode.Shrink;
+    bool ShowUserInfo { get; set; }
+    string CurrentModule { get; set; } = "Inicio";
+    IReadOnlyList<ModuleDefinition> VisibleModules { get; set; } = [];
+    IReadOnlyList<ModuleGroupItem> VisibleModuleGroups { get; set; } = [];
+    IReadOnlyList<HeaderMenuItem> HeaderMenuItems { get; set; } = [];
+
+    protected override async Task OnInitializedAsync() {
+        locationChangeSubscription = NavigationManager.RegisterLocationChangingHandler(_ => {
+            if(SideMenuMode == DrawerMode.Overlap) {
+                IsSideMenuOpen = false;
+            }
+
+            CurrentModule = ResolveCurrentModule();
+            return ValueTask.CompletedTask;
+        });
+
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        VisibleModules = await ModuleAccessService.GetAllowedModulesAsync(authenticationState.User);
+        VisibleModuleGroups = await ModuleAccessService.GetAllowedModuleGroupsAsync(authenticationState.User);
+        HeaderMenuItems = BuildHeaderMenuItems();
+        CurrentModule = ResolveCurrentModule();
+        await base.OnInitializedAsync();
+    }
+
+    string GetThemeSwitcherIconCssClasses() => $"{(ThemeManager.IsDarkTheme ? "sun-icon" : "moon-icon")} icon medium-icon";
+
+    async Task OnThemeChanged() {
+        await ThemeManager.ToggleThemeAsync();
+        StateHasChanged();
+    }
+
+    async Task OnSizeModeChanged(ToolbarItemClickEventArgs e) {
+        await SizeModeSource.NotifyChangedAsync(e.ItemName switch {
+            "Small" => SizeMode.Small,
+            "Large" => SizeMode.Large,
+            _ => SizeMode.Medium
+        });
+        await SizeModeManager.SwitchToSizeModeAsync(SizeMode);
+    }
+
+    (string Name, string Text) GetSizeModeDescriptor(SizeMode? sizeMode = null) {
+        var value = sizeMode ?? SizeMode;
+        var name = value.ToString();
+        return value switch {
+            SizeMode.Small => (name, "Tamaño pequeño"),
+            SizeMode.Large => (name, "Tamaño grande"),
+            _ => (name, "Tamaño mediano")
+        };
+    }
+
+    void OnScreenSizeChanged(bool isSmallScreen) {
+        IsSmallScreen = isSmallScreen;
+        if(BrandingService.ShowHamburgerMenu) {
+            IsSideMenuOpen = !IsSmallScreen;
+            SideMenuMode = IsSmallScreen ? DrawerMode.Overlap : DrawerMode.Shrink;
+        } else {
+            IsSideMenuOpen = false;
+            SideMenuMode = DrawerMode.Shrink;
+        }
+    }
+
+    string ResolveCurrentModule() {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/');
+        if(string.IsNullOrWhiteSpace(relativePath)) {
+            return "Inicio";
+        }
+
+        return ModuleAccessService.ResolveModuleName(relativePath, VisibleModules);
+    }
+
+    IReadOnlyList<HeaderMenuItem> BuildHeaderMenuItems() {
+        var items = new List<HeaderMenuItem>();
+
+        if(ModuleAccessService.ShowHomePage) {
+            items.Add(new HeaderMenuItem {
+                Key = "HOME",
+                Text = "Inicio",
+                NavigateUrl = "/",
+                IconCssClass = "crm-icon icon medium-icon",
+                Visible = true
+            });
+        }
+
+        foreach(var group in VisibleModuleGroups) {
+            items.Add(new HeaderMenuItem {
+                Key = group.Group.Code,
+                Text = group.Group.Name,
+                IconCssClass = group.Group.IconCssClass,
+                Visible = true
+            });
+
+            foreach(var module in group.Modules) {
+                items.Add(new HeaderMenuItem {
+                    Key = module.Code,
+                    ParentKey = group.Group.Code,
+                    Text = module.Name,
+                    NavigateUrl = module.Route,
+                    IconCssClass = module.IconCssClass,
+                    Visible = true
+                });
+            }
+        }
+
+        return items;
+    }
+
+    sealed class HeaderMenuItem {
+        public string Key { get; set; } = string.Empty;
+        public string? ParentKey { get; set; }
+        public string Text { get; set; } = string.Empty;
+        public string? NavigateUrl { get; set; }
+        public string? IconCssClass { get; set; }
+        public string? CssClass { get; set; }
+        public bool BeginGroup { get; set; }
+        public bool Visible { get; set; } = true;
+    }
+
+    public void Dispose() => locationChangeSubscription?.Dispose();
+}

@@ -1,0 +1,511 @@
+﻿@page "/VIEWS/Aceria/ConfiguracionTundish"
+@using DevExpress.Blazor
+@using GPX.Negocio.Aceria
+@using GPX.Negocio.ORM
+@rendermode InteractiveServer
+
+
+@attribute [Authorize(Policy = "Module:CONFIGURACION_TUNDISH")]
+
+<PageTitle>Configuracion Tundish</PageTitle>
+
+<div class="content-root">
+    <DxGridLayout CssClass="page-layout">
+        <Rows>
+            <DxGridLayoutRow Height="auto" />
+            <DxGridLayoutRow Height="1fr" />
+        </Rows>
+        <Columns>
+            <DxGridLayoutColumn Width="1fr" />
+        </Columns>
+        <Items>
+            <DxGridLayoutItem Row="0" Column="0" CssClass="layout-header">
+                <Template>
+                    <div class="card toolbar">
+
+                        <DxFormLayout CssClass="form-layout-compact">
+                            <DxFormLayoutGroup Caption="Filtros" ColSpanMd="4">
+                                <DxFormLayoutItem Caption="Necesidad:" ColSpanMd="6">
+
+                                    <DxDateRangePicker StartDate="@FechaInicio"
+                                                       EndDate="@FechaFin"
+                                                       NullText="Select a date range..."
+                                                       StartDateChanged="@((DateTime value) => OnFechaInicioChanged(value))"
+                                                       EndDateChanged="@((DateTime value) => OnFechaFinChanged(value))"
+                                                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                       CssClass="cw-320"
+                                                       InputId="deNullableDate">
+                                    </DxDateRangePicker>
+
+                                                                    </DxFormLayoutItem>
+                                <DxFormLayoutItem Caption="Tundish:" ColSpanMd="6">
+                                                   
+                                    <DxDateRangePicker StartDate="@FechaInicioTundish"
+                                                       EndDate="@FechaFinTundish"
+                                                       NullText="Select a date range..."                             
+                                                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                       CssClass="cw-320"
+                                                       InputId="deNullableDate">
+                                    </DxDateRangePicker>
+
+                                </DxFormLayoutItem>
+
+                                <DxFormLayoutItem Caption="Version:" ColSpanMd="8">
+                                                   
+                                    <DxComboBox Data="@ListaConfiguracionTundishControl" CssClass="combo-compact"
+                                                Value="@VersionSeleccionadaValue"
+                                                ValueChanged="@((long? value) => OnVersionChanged(value))"
+                                                ValueFieldName="@nameof(ConfiguracionTundishControl.IdVersion)"
+                                                TextFieldName="@nameof(ConfiguracionTundishControl.IdVersion)"
+                                                NullText="---"
+                                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                                            
+                                        <Columns>
+                                            <DxListEditorColumn Caption="Autor" FieldName="@nameof(ConfiguracionTundishControl.UsuarioAutor)" />
+                                            <DxListEditorColumn Caption="BB1 Necesidad/Real" FieldName="@nameof(ConfiguracionTundishControl.NecesidadBB1Display)" />
+                                            <DxListEditorColumn Caption="BB2 Necesidad/Real" FieldName="@nameof(ConfiguracionTundishControl.NecesidadBB2Display)" />
+                                            <DxListEditorColumn Caption="BB3 Necesidad/Real" FieldName="@nameof(ConfiguracionTundishControl.NecesidadBB3Display)" />
+                                            <DxListEditorColumn Caption="Total Necesidad/Real" FieldName="@nameof(ConfiguracionTundishControl.NecesidadTotalDisplay)" />
+                                            <DxListEditorColumn Caption="Fecha Creacion" FieldName="@nameof(ConfiguracionTundishControl.FechaCreacionVersion)" />
+                                            <DxListEditorColumn Caption="Fecha Ultima cambio" FieldName="@nameof(ConfiguracionTundishControl.FechaUltimaModificacion)" />
+                                        </Columns>
+                                    </DxComboBox>
+
+                                            
+                                   
+                                </DxFormLayoutItem>
+
+
+                                <DxFormLayoutItem ColSpanMd="4">
+                                                   
+                                    <DxButton Text="Consultar"
+                                              IconCssClass="refresh-icon icon medium-icon"
+                                              RenderStyle="ButtonRenderStyle.Primary"
+                                              Click="OnConsultarClick"
+                                              Enabled="@(!IsLoading)" />
+
+                                </DxFormLayoutItem>
+                                    
+                            </DxFormLayoutGroup>
+
+                            <DxFormLayoutGroup Caption="Operaciones" ColSpanMd="4">
+
+                                <DxFormLayoutItem ColSpanMd="6">
+                                    <DxComboBox Data="@ListaTundisStandar" CssClass="combo-compact"
+                                                Value="@EstandarSeleccionadoValue"
+                                                ValueChanged="@((int? value) => OnEstandarInicialChanged(value))"
+                                                ValueFieldName="@nameof(ListTundishStandard.tsId)"
+                                                TextFieldName="@nameof(ListTundishStandard.tsNombreCompleto)"
+                                                NullText="Seleccione..."
+                                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                </DxFormLayoutItem>
+
+                      
+                                <DxFormLayoutItem ColSpanMd="4">
+                                    <DxButton Text="Calcular"
+                                              IconCssClass="formula-icon icon medium-icon"
+                                              RenderStyle="ButtonRenderStyle.Primary"
+                                              Click="OnCalcularTundishClick"
+                                              Enabled="@(!IsLoading)" />
+                                </DxFormLayoutItem>
+
+                                <DxFormLayoutItem Caption="Restaurar" ColSpanMd="3">
+                                 
+                                    <DxCheckBox @bind-Checked="RestablecerTundish" ValidationEnabled="false" CheckType="CheckType.Switch" />
+                                </DxFormLayoutItem>
+
+                                <DxFormLayoutItem ColSpanMd="3">
+                                    <DxButton Text="Actual Version"
+                                              IconCssClass="action_save-icon icon medium-icon"
+                                              Click="() => OnGuardarVersionClick(false)"
+                                              Enabled="@PuedeGuardarVersionActual" />
+                                </DxFormLayoutItem>
+
+
+                                <DxFormLayoutItem ColSpanMd="3">
+                                    <DxButton Text="Nueva Version"
+                                              IconCssClass="action_save_new-icon icon medium-icon"
+                                              Click="() => OnGuardarVersionClick(true)"
+                                              Enabled="@(ListaTundishReales.Count > 0)" />
+                                </DxFormLayoutItem>
+
+                                <DxFormLayoutItem ColSpanMd="3">
+                                    <DxButton Text="Ver Configuracion"
+                                              IconCssClass="layoutcustomization_show-icon  icon medium-icon"
+                                              Click="@(() => PopupConfiguracionVisible = true)" />
+                                </DxFormLayoutItem>
+
+                                    
+                            </DxFormLayoutGroup>
+
+
+
+
+                            <DxFormLayoutGroup Caption="Necesidad" ColSpanMd="4">
+
+                                <DxFormLayoutItem ColSpanMd="12">
+
+                                    <div class="necesidad-panel">
+
+                                        <div class="need-strip need-strip-header">
+                                            <div class="kpi need bb1">
+                                                <span>BB1</span>
+                                                <strong>@NecesidadBB1.ToString("N2")</strong>
+                                            </div>
+
+                                            <div class="kpi need bb2">
+                                                <span>BB2</span>
+                                                <strong>@NecesidadBB2.ToString("N2")</strong>
+                                            </div>
+
+                                            <div class="kpi need bb3">
+                                                <span>BB3</span>
+                                                <strong>@NecesidadBB3.ToString("N2")</strong>
+                                            </div>
+
+                                            <div class="kpi need total">
+                                                <span>Total</span>
+                                                <strong>@NecesidadTotal.ToString("N2")</strong>
+                                            </div>
+
+                                            <div class="kpi need neutral">
+                                                <span>Col.Totales</span>
+                                                <strong>@NumColadasReales</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="summary-row summary-row-top">
+                                            <div>
+                                                <span>Minutos</span>
+                                                <strong>@NumMinutosNeceReales</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>Col/Extra std</span>
+                                                <strong>@ColExtraStd.ToString("N2")</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>T/Extra BB1</span>
+                                                <strong>@TnExtraBB1.ToString("N2")</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>T/Extra BB2</span>
+                                                <strong>@TnExtraBB2.ToString("N2")</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>T/Extra BB3</span>
+                                                <strong>@TnExtraBB3.ToString("N2")</strong>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </DxFormLayoutItem>
+
+                            </DxFormLayoutGroup>
+
+
+                                        </DxFormLayout>
+
+                                    </div>
+                                </Template>
+                            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="1" Column="0" CssClass="layout-content">
+                <Template>
+                    <div class="grid-wrapper">
+                        <DxLoadingPanel Visible="@IsLoading"
+                                        IsContentBlocked="true"
+                                        IsContentVisible="true"
+                                        IndicatorVisible="true"
+                                        IndicatorAreaVisible="true"
+                                        ZIndex="101"
+                                        Text="Cargando...">
+                            <DxSplitter CssClass="config-splitter" Orientation="Orientation.Vertical" Width="100%" Height="100%">
+                                <Panes>
+                                    <DxSplitterPane Size="65%" AllowResize="false">
+                                        <DxSplitter CssClass="config-splitter nested-splitter" Width="100%" Height="100%">
+                                            <Panes>
+                                                <DxSplitterPane Size="55%" MinSize="420px" AllowResize="true">
+                                                    <section class="pane-content tundish-pane">
+                                                        <div class="tundish-list">
+                                                            @foreach (var tundish in ListaTundishReales.OrderBy(x => x.NumTundish))
+                                                            {
+                                                                <UcTundish Numero="@tundish.NumTundish"
+                                                                           TundishId="@($"UcTundish_{tundish.NumTundish}")"
+                                                                           VidaUtilTundish="@tundish.HorasVida"
+                                                                           Tundish="@tundish"
+                                                                           EstandarSeleccionado="@EstandarSeleccionado"
+                                                                           ListaTundisStandar="@ListaTundisStandar"
+                                                                           ListaConfiguracionAceria="@ListaConfiguracionAceria"
+                                                                           TundishChanged="OnTundishChanged" />
+
+                                                            }
+
+
+
+
+                                                        </div>
+                                                    </section>
+                                                </DxSplitterPane>
+
+                                                <DxSplitterPane MinSize="360px" AllowResize="true">
+
+                                                    <DxSplitter CssClass="config-splitter nested-splitter" Width="100%" Height="100%" Orientation="Orientation.Vertical">
+                                                        <Panes>
+
+                                                            <DxSplitterPane Size="50%" MinSize="420px" AllowResize="true">
+
+                                                                <div class="detail-grid-panel">
+
+                                                                    <div class="pane-title">
+                                                                        Detalle necesidad
+                                                                    </div>
+
+                                                                    <DxGrid @ref="GridDetalleNecesidad"
+                                                                            CssClass="grid-detalle-necesidad"
+                                                                            Data="@DetalleNecesidadGridData"
+                                                                            KeyFieldName="@nameof(ListDetalleNecesidadBB.OrdenFab)"
+                                                                            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                                            HighlightRowOnHover="true"
+                                                                            TextWrapEnabled="false"
+                                                                            VirtualScrollingEnabled="true"
+                                                                            VirtualScrollingMode="GridVirtualScrollingMode.Rows"
+                                                                            CustomizeElement="OnDetalleGridCustomizeElement">
+
+                                                                        <Columns>
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.OrdenFab)"
+                                                                                              Visible="false" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.Calidad)"
+                                                                                              Caption="Calidad"
+                                                                                              Width="80px"
+                                                                                              ReadOnly="true" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.TipoBB)"
+                                                                                              Caption="Tipo"
+                                                                                              Width="55px"
+                                                                                              ReadOnly="true" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.TnNecesidad)"
+                                                                                              Caption="Tn nec."
+                                                                                              DisplayFormat="n2"
+                                                                                              ReadOnly="true" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.TnReales)"
+                                                                                              Caption="Tn reales"
+                                                                                              DisplayFormat="n2"
+                                                                                              ReadOnly="true" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.ColadasNecesarias)"
+                                                                                              Caption="Col. nec."
+                                                                                              DisplayFormat="n2"
+                                                                                              ReadOnly="true" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.ColadasReales)"
+                                                                                              Caption="Col. rea."
+                                                                                              DisplayFormat="n2"
+                                                                                              ReadOnly="true" />
+
+                                                                            <DxGridDataColumn FieldName="@nameof(ListDetalleNecesidadBB.DiferenciaColadas)"
+                                                                                              Caption="Dif"
+                                                                                              DisplayFormat="n2"
+                                                                                              ReadOnly="true" />
+
+                                                                        </Columns>
+
+                                                                    </DxGrid>
+
+                                                                </div>
+
+                                                            </DxSplitterPane>
+
+                                                            <DxSplitterPane Size="50%" MinSize="420px" AllowResize="true">
+
+                                                      
+                                                                <div class="detail-grid-panel">
+
+                                                                    <div class="pane-title">Detalle Distribucion - Propuesta</div>
+
+                                                                    <DxGrid @ref="GridDistribucion"
+                                                                            Data="@ListaPropuestaDistribucionColadas"
+                                                                            CssClass="grid-distribucion"
+                                                                            KeyFieldName="@nameof(ListaPropuestaDistribucion.NumTRegistro)"
+                                                                            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                                            EditMode="GridEditMode.EditRow"
+                                                                            EditModelSaving="OnDistribucionEditModelSaving"
+                                                                            HighlightRowOnHover="true"
+                                                                            TextWrapEnabled="false"
+                                                                            VirtualScrollingEnabled="true"
+                                                                            CustomizeElement="OnDistribucionGridCustomizeElement">
+                                                                        <Columns>
+                                                                            <DxGridCommandColumn NewButtonVisible="false" DeleteButtonVisible="false" FixedPosition="GridColumnFixedPosition.Right" Width="80px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.NumTRegistro)" Visible="false" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.NumTundish)" Caption="#" Width="30px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.FechaInicioTundis)" Caption="Inicio" DisplayFormat="dd/MM/yyyy HH:mm" Width="130px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.FechaFinTundis)" Caption="Fin" DisplayFormat="dd/MM/yyyy HH:mm" Width="130px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.VidaUtil)" Caption="Vida" DisplayFormat="n0" Width="50px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.NumColadas)" Caption="Coladas" DisplayFormat="n0" Width="76px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.S275H)" Caption="S275-H" DisplayFormat="n0" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.S355TI)" Caption="S355-TI" DisplayFormat="n0" Visible="@ExisteCalidad("S355-TI")" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.S355V)" Caption="S355-V" DisplayFormat="n0" Visible="@ExisteCalidad("S355-V")" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.S355W)" Caption="S355-W" DisplayFormat="n0" Visible="@ExisteCalidad("S355-W")" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.S460A)" Caption="S460-A" DisplayFormat="n0" Visible="@ExisteCalidad("S460-A")" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ListaPropuestaDistribucion.S275TI)" Caption="S275-TI" DisplayFormat="n0" Visible="@ExisteCalidad("S275-TI")" />
+                                                                        </Columns>
+
+                                                                        <TotalSummary>
+
+                                                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(ListaPropuestaDistribucion.S275H)" DisplayText="T:{0}" />
+
+                                                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(ListaPropuestaDistribucion.S355TI)" DisplayText="T:{0}" />
+
+                                                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(ListaPropuestaDistribucion.S355V)" DisplayText="T:{0}" />
+
+                                                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(ListaPropuestaDistribucion.S355W)" DisplayText="T:{0}" />
+
+                                                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(ListaPropuestaDistribucion.S460A)" DisplayText="T:{0}" />
+
+                                                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum" FieldName="@nameof(ListaPropuestaDistribucion.S275TI)" DisplayText="T:{0}" />
+                                                                            
+                                                                        </TotalSummary>
+
+                                                                    </DxGrid>
+
+                                                                </div>
+
+                                                            </DxSplitterPane>
+
+
+                                                        </Panes>
+                                                    </DxSplitter>
+
+                                                </DxSplitterPane>
+                                            </Panes>
+                                        </DxSplitter>
+                                    </DxSplitterPane>
+                                </Panes>
+                            </DxSplitter>
+                        </DxLoadingPanel>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        </Items>
+    </DxGridLayout>
+</div>
+
+<DxPopup @bind-Visible="@PopupConfiguracionVisible"
+         HeaderText="Configuracion"
+         ShowFooter="true"
+         CloseOnEscape="true"
+         CloseOnOutsideClick="true"
+         Width="560px"
+         Height="auto"
+         CssClass="popup-configuracion">
+    <BodyContentTemplate>
+        <section class="compact-table compact-config-table popup-config-table">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th> </th>
+                        <th>UN</th>
+                        <th class="bb1">BB1</th>
+                        <th class="bb2">BB2</th>
+                        <th class="bb3">BB3</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Peso lineal</td>
+                        <td>Kg</td>
+
+                        <td class="bb1">
+                            @Config?.caPesoLinealBB1.ToString("N2")
+                        </td>
+
+                        <td class="bb2">
+                            @Config?.caPesoLinealBB2.ToString("N2")
+                        </td>
+
+                        <td class="bb3">
+                            @Config?.caPesoLinealBB3.ToString("N2")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Vel. max</td>
+                        <td>m/min</td>
+
+                        <td class="bb1">
+                            @Config?.caVelocidadMaximaBB1.ToString("N2")
+                        </td>
+
+                        <td class="bb2">
+                            @Config?.caVelocidadMaximaBB2.ToString("N2")
+                        </td>
+
+                        <td class="bb3">
+                            @Config?.caVelocidadMaximaBB3.ToString("N2")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Productividad</td>
+                        <td>Tn/h</td>
+
+                        <td class="bb1">
+                            @Config?.caTnxHoraBB1.ToString("N2")
+                        </td>
+
+                        <td class="bb2">
+                            @Config?.caTnxHoraBB2.ToString("N2")
+                        </td>
+
+                        <td class="bb3">
+                            @Config?.caTnxHoraBB3.ToString("N2")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Tn cuchara</td>
+                        <td>Tn</td>
+
+                        <td colspan="3" class="total-cuchara">
+                            @((Config?.caToneladasXCuchara ?? 0).ToString("N2"))
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </section>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="Cerrar"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  Click="@(() => PopupConfiguracionVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+@page "/modulos/clientes"
+@attribute [Authorize(Policy = "Module:CUSTOMERS")]
+
+<PageTitle>Clientes</PageTitle>
+
+<div class="block-content card">
+    <div class="title">
+        <div class="title-text">Clientes</div>
+    </div>
+    <p>Modulo base de catalogos. Sirve para comprobar que el perfil dicta el menu y el acceso, aunque el usuario tenga o no claims adicionales.</p>
+
+    <ModuleAccessSummary ModuleCode="CUSTOMERS" />
+</div>

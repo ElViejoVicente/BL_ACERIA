@@ -1,0 +1,219 @@
+﻿/* =========================================================
+   BASE DE PÁGINA
+   Replicar en nuevas páginas Blazor
+   ========================================================= */
+
+.content-root {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.page-layout {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.layout-header,
+.layout-content,
+.layout-footer {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.layout-content {
+    height: 100%;
+}
+
+.toolbar {
+    padding: 0.5rem;
+}
+
+.card,
+.grid-wrapper {
+    background-color: var(--dxds-color-surface-neutral-default-rest);
+    border: 1px solid var(--dxds-color-border-neutral-default-rest);
+    border-radius: 0.35rem;
+}
+
+.card {
+    min-width: 0;
+}
+
+.grid-wrapper {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+::deep .grid-necesidades {
+    height: 100%;
+    max-height: 100%;
+}
+
+
+/* =========================================================
+   FOOTER / LEYENDA
+   ========================================================= */
+
+.calidad-legend-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0.85rem;
+    flex-wrap: wrap;
+    background-color: var(--dxds-color-surface-neutral-default-rest);
+    border: 1px solid var(--dxds-color-border-neutral-default-rest);
+    border-radius: 0.35rem;
+    color: inherit;
+}
+
+.legend-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: inherit;
+}
+
+.legend-title-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4da3ff;
+    flex-shrink: 0;
+}
+
+.legend-items {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    border: 1px solid var(--dxds-color-border-neutral-default-rest);
+}
+
+.legend-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: inherit;
+}
+
+
+/* =========================================================
+   NECESIDADES ACERÍA
+   Colores condicionales del grid
+   ========================================================= */
+
+::deep .grid-necesidades .calidad-s355ti {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+::deep .grid-necesidades .calidad-s355v {
+    background-color: #70ad47 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+::deep .grid-necesidades .calidad-s355w {
+    background-color: #f3819a !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+::deep .grid-necesidades .calidad-s460a {
+    background-color: #ffc000 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+::deep .grid-necesidades .calidad-s275ti {
+    background-color: #ffff00 !important;
+    color: #1f1f1f !important;
+    font-weight: 600;
+}
+
+::deep .grid-necesidades .calidad-s355ti *,
+::deep .grid-necesidades .calidad-s355v *,
+::deep .grid-necesidades .calidad-s355w *,
+::deep .grid-necesidades .calidad-s460a * {
+    color: #ffffff !important;
+}
+
+::deep .grid-necesidades .calidad-s275ti * {
+    color: #1f1f1f !important;
+}
+
+
+/* =========================================================
+   COLORES LEYENDA
+   ========================================================= */
+
+.color-s355ti {
+    background-color: #ff0000;
+}
+
+.color-s355v {
+    background-color: #70ad47;
+}
+
+.color-s355w {
+    background-color: #f1a983;
+}
+
+.color-s460a {
+    background-color: #ffc000;
+}
+
+.color-s275ti {
+    background-color: #ffff00;
+}
+
+
+/* =========================================================
+   ICONOS CUSTOM
+   ========================================================= */
+
+::deep .column-chooser-icon {
+    mask-image: url("images/icons/column-chooser.svg");
+}
+
+::deep .export-icon {
+    mask-image: url("images/icons/arrow-export-up.svg");
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .calidad-legend-footer {
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+
+    .legend-items {
+        width: 100%;
+        gap: 0.75rem;
+    }
+}

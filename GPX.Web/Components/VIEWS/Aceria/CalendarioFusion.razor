@@ -1,0 +1,362 @@
+﻿@page "/VIEWS/Aceria/CalendarioFusion"
+@using Microsoft.AspNetCore.Components.Forms
+@using DevExpress.Blazor
+@using GPX.Negocio.Aceria
+@using GPX.Negocio.ORM
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "Module:CALENDARIO_FUSION_HORNO")]
+
+<PageTitle>Calendario Fusión Horno</PageTitle>
+
+<div class="content-root">
+    <DxGridLayout CssClass="page-layout">
+        <Rows>
+            <DxGridLayoutRow Height="auto" />
+            <DxGridLayoutRow Height="1fr" />
+            <DxGridLayoutRow Height="auto" />
+        </Rows>
+        <Columns>
+            <DxGridLayoutColumn Width="1fr" />
+        </Columns>
+        <Items>
+            <DxGridLayoutItem Row="0" Column="0" CssClass="layout-header">
+                <Template>
+                    <div class="card toolbar">
+                        <DxToolbar Title="Calendario fusión horno" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+
+                          
+
+                            <DxToolbarItem Text="Hasta" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
+                                <Template>
+                                    <DxDateEdit @bind-Date="FechaHasta"
+                                                DisplayFormat="dd/MM/yyyy"
+                                                Width="150px" />
+                                </Template>
+                            </DxToolbarItem>
+
+                            <DxToolbarItem Alignment="ToolbarItemAlignment.Left">
+                                <Template>
+                                    <DxButton Text="Actualizar"
+                                              IconCssClass="refresh-icon icon medium-icon"
+                                              RenderStyle="ButtonRenderStyle.Primary"
+                                              Click="OnConsultarClick" />
+                                </Template>
+                            </DxToolbarItem>
+
+                            <DxToolbarItem Text="Cambio de Tundish"
+                                           BeginGroup="true"
+                                           IconCssClass="change-icon icon medium-icon"
+                                           Click="OnAbrirCambioTundish" />
+
+                            <DxToolbarItem Text="Cargar calendario"
+                                           IconCssClass="upload-icon icon medium-icon"
+                                           Click="OnAbrirCargaCalendario" />
+
+                            <DxToolbarItem Text="Listado de Tundish"
+                                           IconCssClass="list-icon icon medium-icon"
+                                           Click="OnAbrirListadoTundish" />
+
+                            <DxToolbarItem Tooltip="Column chooser"
+                                           Alignment="ToolbarItemAlignment.Right"
+                                           Click="OnColumnChooserItemClick"
+                                           IconCssClass="column-chooser-icon icon medium-icon" />
+
+                            <DxToolbarItem Text="Exportar"
+                                           Alignment="ToolbarItemAlignment.Right"
+                                           IconCssClass="export-icon icon medium-icon">
+                                <Items>
+                                    <DxToolbarItem Text="Excel" Click="ExportAllDataToExcel" />
+                                    <DxToolbarItem Text="CSV" Click="ExportAllDataToCsv" />
+                                    <DxToolbarItem Text="PDF" Click="ExportAllDataToPdf" />
+                                </Items>
+                            </DxToolbarItem>
+                        </DxToolbar>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="1" Column="0" CssClass="layout-content">
+                <Template>
+                    <div class="grid-wrapper">
+                        <DxLoadingPanel Visible="@IsLoading"
+                                        IsContentBlocked="true"
+                                        IsContentVisible="true"
+                                        IndicatorVisible="true"
+                                        IndicatorAreaVisible="true"
+                                        ZIndex="101"
+                                        Text="Cargando...">
+
+                            <DxGrid @ref="GridCalendario"
+                                    Data="@ListaCalendarioFusion"
+                                    KeyFieldName="cafId"
+                                    ShowFilterRow="true"
+                                    ShowSearchBox="true"
+                                    HighlightRowOnHover="true"
+                                    TextWrapEnabled="false"
+                                    FocusedRowEnabled="true"
+                                    VirtualScrollingEnabled="true"
+                                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                    EditMode="GridEditMode.PopupEditForm"
+                                    EditModelSaving="OnEditModelSaving"
+                                    CssClass="grid-calendario"
+                                    AutoExpandAllGroupRows="true"
+                                    SkeletonRowsEnabled="true"    
+                                    PopupEditFormCssClass="calendar-edit-popup">
+                                <Columns>
+                              
+                                    <DxGridDataColumn FieldName="cafId" Caption="Id" Visible="false" />
+                                    <DxGridDataColumn FieldName="cafFecha" Caption="Día" DisplayFormat="dd/MM/yyyy" Width="115px" ReadOnly="true" />
+
+                                    @foreach (var hora in Horas)
+                                    {
+                                        <DxGridDataColumn FieldName="@hora.CampoHora" Caption="@hora.Caption" Width="76px">
+                                            <CellDisplayTemplate Context="cellContext">
+                                                @{
+                                                    var item = (CalendarioFusionHorno)cellContext.DataItem;
+                                                    var activo = GetHoraActiva(item, hora.Numero);
+                                                    var tipo = GetTipoSemi(item, hora.Numero);
+                                                }
+                                                @if (activo)
+                                                {
+                                                    <span class="grid-badge @GetTipoCss(tipo, activo)">@tipo</span>
+                                                }
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                    }
+
+                                    <DxGridCommandColumn Width="90px"
+                                                         FixedPosition="GridColumnFixedPosition.Right"
+                                                         NewButtonVisible="false"
+                                                         DeleteButtonVisible="false"
+                                                         EditButtonVisible="true" />
+                                </Columns>
+
+                                <EditFormTemplate Context="editFormContext">
+                                    @{
+                                        var item = (CalendarioFusionHorno)editFormContext.EditModel;
+                                    }
+
+                                    <DxFormLayout CssClass="calendar-edit-form" >
+
+                      
+                                        @foreach (var hora in Horas)
+                                        {
+                                            <DxFormLayoutItem Caption="@hora.Caption" ColSpanMd="4">
+                                                <Template>
+                                                    <div class="calendar-hour-editor">
+
+                                                        <DxCheckBox Checked="@GetHoraActiva(item, hora.Numero)"
+                                                                    CheckedChanged="@((bool value) => SetHoraActiva(item, hora.Numero, value))"
+                                                                    ValidationEnabled="false" />
+
+                                                        <DxComboBox Data="@TiposSemi"
+                                                                    Value="@GetTipoSemi(item, hora.Numero)"
+                                                                    ValueChanged="@((string value) => SetTipoSemi(item, hora.Numero, value))"
+                                                                    NullText="Tipo"
+                                                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Never"
+                                                                    Enabled="@GetHoraActiva(item, hora.Numero)"
+                                                                    ValidationEnabled="false"
+                                                                    Width="100%" />
+                                                    </div>
+                                                </Template>
+                                            </DxFormLayoutItem>
+                                        }
+
+                                    </DxFormLayout>
+                                </EditFormTemplate>
+                            </DxGrid>
+                        </DxLoadingPanel>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="2" Column="0" CssClass="layout-footer">
+                <Template>
+                    <div class="calendar-legend-footer">
+                        <span class="legend-title">Leyenda</span>
+                        <span class="legend-item"><span class="legend-color tipo-bb"></span>BB</span>
+                        <span class="legend-item"><span class="legend-color tipo-p140"></span>P140</span>
+                        <span class="legend-item"><span class="legend-color tipo-p160"></span>P160</span>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        </Items>
+    </DxGridLayout>
+</div>
+
+<DxPopup @bind-Visible="PopupCambioTundishVisible"
+         HeaderText="Cambio de Tundish"
+         Id="popupCambioTundish"
+         Width="560px"
+         ShowFooter="true"
+         CloseOnEscape="true"
+         CssClass="app-popup">
+
+    <BodyContentTemplate>
+        <DxFormLayout>
+            <DxFormLayoutItem Caption="Fecha inicio" ColSpanMd="6">
+                <Template Context="fechaInicioContext">
+                    <DxDateEdit @bind-Date="CambioFechaInicio"
+                                DisplayFormat="dd/MM/yyyy HH:mm"
+                                TimeSectionVisible="true" />
+                </Template>
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="Fecha fin" ColSpanMd="6">
+                <Template Context="fechaFinContext">
+                    <DxDateEdit @bind-Date="CambioFechaFin"
+                                DisplayFormat="dd/MM/yyyy HH:mm"
+                                TimeSectionVisible="true" />
+                </Template>
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="Tipo semi" ColSpanMd="12">
+                <Template Context="tipoSemiContext">
+                    <DxComboBox Data="@TiposSemi"
+                                @bind-Value="CambioTipoSemi"
+                                NullText="Seleccione tipo..." />
+                </Template>
+            </DxFormLayoutItem>
+        </DxFormLayout>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate>
+        <DxButton Text="Cancelar"
+                  Click="@(() => PopupCambioTundishVisible = false)" />
+
+        <DxButton Text="Guardar"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  Click="OnGuardarCambioTundish" />
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="PopupCargaVisible"
+         HeaderText="Cargar calendario"
+         Width="420px"
+         ShowFooter="true"
+         CloseOnEscape="true"
+         CssClass="app-popup">
+    <BodyContentTemplate>
+        <div class="upload-box">
+            <InputFile OnChange="OnArchivoSeleccionado" accept=".csv" />
+            <div class="upload-help">Archivo CSV separado por punto y coma (;).</div>
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="Cancelar" Click="() => PopupCargaVisible = false" />
+        <DxButton Text="Procesar" RenderStyle="ButtonRenderStyle.Primary" Click="OnProcesarArchivoCalendario" Enabled="@(ArchivoCalendario is not null)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="PopupListadoTundishVisible"
+         HeaderText="Listado de Tundish disponibles"
+         Width="77vw"
+         Height="450px"
+         CloseOnEscape="true" VerticalAlignment="VerticalAlignment.Center"
+         CssClass="app-popup popup-tundish">
+
+    <BodyContentTemplate>
+        <div class="tundish-popup-body">
+
+            <fieldset class="tundish-panel">
+                <legend>Tundish BB</legend>
+
+                <DxGrid Data="@ListaTundishDisponiblesBB"
+                        KeyFieldName="NumTundish"
+                        HighlightRowOnHover="true"
+                        TextWrapEnabled="false"
+                        EditMode="GridEditMode.EditRow"
+                        EditModelSaving="OnTundishEditModelSaving"
+                        CssClass="grid-tundish">
+                    <Columns>
+                        <DxGridDataColumn FieldName="FechaInicio" Caption="Inicio" DisplayFormat="dd/MM/yyyy HH:mm" Width="135px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="FechaFin" Caption="Fin" DisplayFormat="dd/MM/yyyy HH:mm" Width="135px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="HorasVida" Caption="Horas" Width="70px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="TipoSemi" Caption="Tipo" Width="70px">
+                            <CellDisplayTemplate Context="cellContext">
+                                @{
+                                    var rowBB = (ListTundishDisponibles)cellContext.DataItem;
+                                }
+                                <span class="grid-badge @GetTipoCss(rowBB.TipoSemi, true)">@rowBB.TipoSemi</span>
+                            </CellDisplayTemplate>
+                            <EditSettings>
+                                <DxComboBoxSettings Data="@TiposSemi" />
+                            </EditSettings>
+                        </DxGridDataColumn>
+                        <DxGridCommandColumn Width="90px" />
+                    </Columns>
+                </DxGrid>
+            </fieldset>
+
+            <fieldset class="tundish-panel">
+                <legend>Tundish P140</legend>
+
+                <DxGrid Data="@ListaTundishDisponiblesP140"
+                        KeyFieldName="NumTundish"
+                        HighlightRowOnHover="true"
+                        TextWrapEnabled="false"
+                        EditMode="GridEditMode.EditRow"
+                        EditModelSaving="OnTundishEditModelSaving"
+                        CssClass="grid-tundish">
+                    <Columns>
+                        <DxGridDataColumn FieldName="FechaInicio" Caption="Inicio" DisplayFormat="dd/MM/yyyy HH:mm" Width="135px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="FechaFin" Caption="Fin" DisplayFormat="dd/MM/yyyy HH:mm" Width="135px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="HorasVida" Caption="Horas" Width="70px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="TipoSemi" Caption="Tipo" Width="70px">
+                            <CellDisplayTemplate Context="cellContext">
+                                @{
+                                    var rowP140 = (ListTundishDisponibles)cellContext.DataItem;
+                                }
+                                <span class="grid-badge @GetTipoCss(rowP140.TipoSemi, true)">@rowP140.TipoSemi</span>
+                            </CellDisplayTemplate>
+                            <EditSettings>
+                                <DxComboBoxSettings Data="@TiposSemi" />
+                            </EditSettings>
+                        </DxGridDataColumn>
+                        <DxGridCommandColumn Width="90px" />
+                    </Columns>
+                </DxGrid>
+            </fieldset>
+
+            <fieldset class="tundish-panel">
+                <legend>Tundish P160</legend>
+
+                <DxGrid Data="@ListaTundishDisponiblesP160"
+                        KeyFieldName="NumTundish"
+                        HighlightRowOnHover="true"
+                        TextWrapEnabled="false"
+                        EditMode="GridEditMode.EditRow"
+                        EditModelSaving="OnTundishEditModelSaving"
+                        CssClass="grid-tundish">
+                    <Columns>
+                        <DxGridDataColumn FieldName="FechaInicio" Caption="Inicio" DisplayFormat="dd/MM/yyyy HH:mm" Width="135px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="FechaFin" Caption="Fin" DisplayFormat="dd/MM/yyyy HH:mm" Width="135px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="HorasVida" Caption="Horas" Width="70px" ReadOnly="true" />
+                        <DxGridDataColumn FieldName="TipoSemi" Caption="Tipo" Width="70px">
+                            <CellDisplayTemplate Context="cellContext">
+                                @{
+                                    var rowP160 = (ListTundishDisponibles)cellContext.DataItem;
+                                }
+                                <span class="grid-badge @GetTipoCss(rowP160.TipoSemi, true)">@rowP160.TipoSemi</span>
+                            </CellDisplayTemplate>
+                            <EditSettings>
+                                <DxComboBoxSettings Data="@TiposSemi" />
+                            </EditSettings>
+                        </DxGridDataColumn>
+                        <DxGridCommandColumn Width="90px" />
+                    </Columns>
+                </DxGrid>
+            </fieldset>
+
+            <fieldset class="tundish-info">
+                <legend>Información</legend>
+                Si existen tundish con un tiempo de vida muy corto o sin sentido,
+                <br />
+                verifique y edite manualmente las horas activas del calendario, antes de usar esta funcionalidad.
+            </fieldset>
+
+        </div>
+    </BodyContentTemplate>
+</DxPopup>

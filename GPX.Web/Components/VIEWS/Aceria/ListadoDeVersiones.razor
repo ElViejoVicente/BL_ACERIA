@@ -1,0 +1,242 @@
+@page "/VIEWS/Aceria/ListadoDeVersiones"
+@using GPX.Negocio.Aceria
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "Module:LISTADO_VERSIONES")]
+
+<PageTitle>Listado de Versiones</PageTitle>
+
+<div class="content-root">
+    <DxGridLayout CssClass="page-layout">
+        <Rows>
+            <DxGridLayoutRow Height="auto" />
+            <DxGridLayoutRow Height="1fr" />
+        </Rows>
+        <Columns>
+            <DxGridLayoutColumn Width="1fr" />
+        </Columns>
+        <Items>
+            <DxGridLayoutItem Row="0" Column="0" CssClass="layout-header">
+                <Template>
+                    <div class="card toolbar-card">
+                        <DxToolbar Title="Listado de Versiones" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                            <DxToolbarItem Text="Inicio" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
+                                <Template>
+                                    <DxDateEdit @bind-Date="FechaInicio" DisplayFormat="dd/MM/yyyy" Width="150px" />
+                                </Template>
+                            </DxToolbarItem>
+
+                            <DxToolbarItem Text="Fin" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
+                                <Template>
+                                    <DxDateEdit @bind-Date="FechaFin" DisplayFormat="dd/MM/yyyy" Width="150px" />
+                                </Template>
+                            </DxToolbarItem>
+
+                            <DxToolbarItem Alignment="ToolbarItemAlignment.Left">
+                                <Template>
+                                    <DxButton Text="Actualizar"
+                                              IconCssClass="refresh-icon icon medium-icon"
+                                              RenderStyle="ButtonRenderStyle.Primary"
+                                              Click="OnConsultarClick" />
+                                </Template>
+                            </DxToolbarItem>
+                        </DxToolbar>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="1" Column="0" CssClass="layout-content">
+                <Template>
+                    <div class="grid-wrapper">
+                        <DxLoadingPanel Visible="@IsLoading"
+                                        IsContentBlocked="true"
+                                        IsContentVisible="true"
+                                        IndicatorVisible="true"
+                                        IndicatorAreaVisible="true"
+                                        Text="Cargando...">
+
+
+                            @if (Versiones.Count == 0)
+                            {
+                                <div class="empty-state">No existen versiones para el rango seleccionado.</div>
+                            }
+                            else
+                            {
+                                <div class="version-period-list">
+                                    @foreach (var grupo in VersionesAgrupadas)
+                                    {
+                                        <section class="version-period-group">
+                                            <div class="period-title">Necesidad: @grupo.FechaInicio.ToString("yyyy/MM/dd")-@grupo.FechaFin.ToString("yyyy/MM/dd")</div>
+
+                                            <DxGrid Data="@grupo.Versiones"
+                                                    KeyFieldName="IdVersion"
+                                                    ShowAllRows="true"
+                                                    HighlightRowOnHover="true"
+                                                    TextWrapEnabled="false"
+                                                    CssClass="grid-versiones">
+                                                <Columns>
+                                                    <DxGridDataColumn FieldName="Version" Caption="Versión" Width="110px" />
+                                                    <DxGridDataColumn FieldName="TundishActivos" Caption="Tundish Activos" Width="130px" />
+
+                                                    <DxGridDataColumn Caption="Estado" Width="90px">
+                                                        <CellDisplayTemplate>
+                                                            @{
+                                                                var row = (ListadoVersionVm)context.DataItem;
+                                                            }
+                                                            <span class="estado-dot @(row.EstadoOk ? "ok" : "ko")"></span>
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+
+                                                    <DxGridDataColumn FieldName="FechaCreacion" Caption="Fecha Creacion" DisplayFormat="dd/MM/yyyy HH:mm" Width="150px" />
+                                                    <DxGridDataColumn FieldName="FechaModificacion" Caption="Fecha Modificacion" DisplayFormat="dd/MM/yyyy HH:mm" Width="150px" />
+                                                    <DxGridDataColumn FieldName="Autor" Caption="Autor" Width="200px" />
+
+
+                                                    <DxGridDataColumn FieldName="NumeroColadas" Caption="Nº Coladas Totales" Width="145px" />
+                                                    <DxGridDataColumn FieldName="NumeroBarras" Caption="Nº Barras" Width="100px" />
+
+                                                    <DxGridDataColumn Caption="Calidades" MinWidth="200">
+                                                        <CellDisplayTemplate>
+                                                            @{
+                                                                var row = (ListadoVersionVm)context.DataItem;
+                                                            }
+
+                                                            <div class="calidades-cell">
+                                                                @foreach (var calidad in row.Calidades)
+                                                                {
+                                                                    <span class="calidad-tag @GetCalidadClass(calidad)">
+                                                                        @calidad
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+
+                                                    <DxGridDataColumn Caption="Acción" Width="110px">
+                                                        <CellDisplayTemplate>
+                                                            @{
+                                                                var row = (ListadoVersionVm)context.DataItem;
+                                                            }
+                                                            <DxButton Text="Activar"
+                                                                      RenderStyle="ButtonRenderStyle.Primary"
+                                                                      SizeMode="SizeMode.Small"
+                                                                      Click="@(async () => await OnActivarVersionClick(row))" />
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+
+                                                    <DxGridDataColumn Caption="Generar versión de corte" Width="180px">
+                                                        <CellDisplayTemplate>
+                                                            @{
+                                                                var row = (ListadoVersionVm)context.DataItem;
+                                                            }
+                                                            <DxButton Text="Generar"
+                                                                      RenderStyle="ButtonRenderStyle.Secondary"
+                                                                      SizeMode="SizeMode.Small"
+                                                                      Click="@(async () => await OnGenerarVersionCorteClick(row))" />
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+                                                </Columns>
+
+                                                <DetailRowTemplate Context="detailContext">
+                                                    @{
+                                                        var version = (ListadoVersionVm)detailContext.DataItem;
+                                                    }
+
+                                                    <div class="detail-wrapper">
+
+                                       
+                                                        <div class="bb-filters">
+                                                            <DxTagBox Data="@version.AllCalidades"
+                                                                      Values="@version.FiltroCalidades"
+                                                                      ValuesChanged="@(EventCallback.Factory.Create<IEnumerable<string>>(this, v => { version.FiltroCalidades = v?.ToList(); StateHasChanged(); }))"
+                                                                      NullText="Filtrar por calidad..."
+                                                                      ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                                      SizeMode="SizeMode.Small"
+                                                                      CssClass="bb-filter" />
+                                        
+                                                            <DxTagBox Data="@version.AllLongitudes"
+                                                                      Values="@version.FiltroLongitudes"
+                                                                      ValuesChanged="@(EventCallback.Factory.Create<IEnumerable<int>>(this, v => { version.FiltroLongitudes = v?.ToList(); StateHasChanged(); }))"
+                                                                      NullText="Filtrar por longitud..."
+                                                                      ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                                      SizeMode="SizeMode.Small"
+                                                                      CssClass="bb-filter" />
+                                        
+                                                            <DxButton Text="Limpiar filtros"
+                                                                      IconCssClass="oi oi-x"
+                                                                      RenderStyle="ButtonRenderStyle.Secondary"
+                                                                      SizeMode="SizeMode.Small"
+                                                                      Click="@(() => { version.FiltroCalidades = null; version.FiltroLongitudes = null; })" />
+                                                        </div>
+
+                                                        <div class="bb-groups">
+                                                            @foreach (var tipo in new[] { "BB1", "BB2", "BB3" })
+                                                            {
+                                                                var items = version.Detalles?
+                                                                    .Where(d => string.Equals(d.TipoSemi?.Trim(), tipo, StringComparison.OrdinalIgnoreCase))
+                                                                    .Where(d => version.FiltroCalidades == null || !version.FiltroCalidades.Any() || version.FiltroCalidades.Contains(d.Calidad))
+                                                                    .Where(d => version.FiltroLongitudes == null || !version.FiltroLongitudes.Any() || version.FiltroLongitudes.Contains(d.Longitud))
+                                                                    .OrderBy(d => d.Calidad)
+                                                                    .ThenBy(d => d.Longitud)
+                                                                    .ToList() ?? new List<DetalleVersionVm>();
+                                                                var cls = tipo.ToLower();
+                                                                <div class="bb-group">
+                                                                    <table class="compact-table">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th colspan="4" class="bb-header @cls">@tipo</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th class="@cls">Calidad</th>
+                                                                                <th class="@cls num">Medida</th>
+                                                                                <th class="@cls num">Nº UN Nec.</th>
+                                                                                <th class="@cls num">Nº UN Plan.</th>
+                                                                                <th class="@cls num">Nº UN Fab.</th>
+                                                                                <th class="@cls">GAP</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @if (items.Count == 0)
+                                                                            {
+                                                                                <tr><td colspan="4" class="empty">—</td></tr>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @foreach (var d in items)
+                                                                                {
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <span class="calidad-tag @GetCalidadClass(d.Calidad)">@d.Calidad</span>
+                                                                                        </td>
+                                                                                        <td class="num">@d.Longitud.ToString("N0")</td>
+                                                                                        <td class="num">@d.NumeroBarras.ToString("N0")</td>
+                                                                                        <td class="num">0</td>
+                                                                                        <td class="num">0</td>
+                                                                                        <td>
+                                                                                            <span class="estado-dot @(d.GAP ? "ok" : "ko")"
+                                                                                                  title="@(d.GAP ? "Cumple" : "No cumple")"></span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                }
+                                                                            }
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            }
+                                                        </div>
+
+                                                        <div class="detail-note">* Haz clic de nuevo en la fila para ocultar el detalle.</div>
+                                                    </div>
+                                                </DetailRowTemplate>
+                                            </DxGrid>
+                                        </section>
+                                    }
+                                </div>
+                            }
+                        </DxLoadingPanel>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        </Items>
+    </DxGridLayout>
+</div>

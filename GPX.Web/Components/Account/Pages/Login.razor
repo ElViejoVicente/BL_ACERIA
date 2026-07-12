@@ -1,0 +1,105 @@
+@page "/Account/Login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+
+@inject BrandingService BrandingService
+@inject SignInManager<ApplicationUser> SignInManager
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Acceso</PageTitle>
+
+<div class="login-shell" style="@BrandingService.GetLoginBackgroundStyle()">
+    <div class="block-content card login-card">
+        <div class="login-company-mark">
+            <img src="@BrandingService.GetSubCompanyLogoPath()" alt="@BrandingService.Current.SubCompanyDisplayName" />
+        </div>
+        <div class="login-company-caption">@BrandingService.BrandCaption</div>
+
+        <div class="login-halo login-halo-top"></div>
+        <div class="login-halo login-halo-bottom"></div>
+
+        <StatusMessage Message="@errorMessage" />
+        <EditForm Model="@Input" method="post" OnValidSubmit="LoginUser" FormName="login" Context="Login">
+            <DataAnnotationsValidator />
+                <DxFormLayout CaptionPosition=@CaptionPosition.Vertical>
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <div class="title login-title">
+                            <div class="eyebrow">@BrandingService.Current.WelcomeText</div>
+                        </div>
+                    </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Correo electrónico" ColSpanMd="12" BeginRow="true">
+                    <InteractiveServerTextBox Name="Input.Email" type="email" Value="@Input.Email" />
+                    <ValidationMessage class="text-danger" For="() => Input.Email" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Contraseña" ColSpanMd="12" BeginRow="true">
+                    <InteractiveServerTextBox Name="Input.Password" Value="@Input.Password" Password="true" NullText="Escribe tu contraseña" />
+                    <ValidationMessage class="text-danger" For="() => Input.Password" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
+                    <InteractiveServerCheckbox Name="Input.RememberMe" InputId="rememberme" Value="@Input.RememberMe" LabelText="Mantener sesión iniciada"/>
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
+                    <DxButton CssClass="w-100" SubmitFormOnClick="true" Text="Entrar"></DxButton>
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </EditForm>
+        @if(BrandingService.IsMicrosoft365SsoEnabled) {
+            <div class="or">
+                <div class="or-line"></div>
+                <div class="or-text">o</div>
+                <div class="or-line"></div>
+            </div>
+            <ExternalLoginPicker />
+        }
+        <div class="links-container">
+            <span>¿No tienes una cuenta?</span><a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Regístrate</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? errorMessage;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    public async Task LoginUser() {
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        if(result.Succeeded) {
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectTo(ReturnUrl);
+        } else if(result.RequiresTwoFactor) {
+            RedirectManager.RedirectTo(
+                "Account/LoginWith2fa",
+                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        } else if(result.IsLockedOut) {
+            Logger.LogWarning("User account locked out.");
+            RedirectManager.RedirectTo("Account/Lockout");
+        } else {
+            errorMessage = "Error: intento de inicio de sesión no válido.";
+        }
+    }
+
+    private sealed class InputModel {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Mantener sesión iniciada")]
+        public bool RememberMe { get; set; }
+    }
+}

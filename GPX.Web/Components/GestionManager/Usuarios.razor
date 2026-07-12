@@ -1,0 +1,170 @@
+@page "/gestion/usuarios"
+@attribute [Authorize(Policy = "Module:ADMIN_USERS")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Usuarios</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Usuarios</h1>
+            <p>Gestiona el usuario, su perfil funcional, los roles asignados y sus claims individuales.</p>
+        </div>
+        <button type="button" class="admin-secondary-button" @onclick="PrepareNewUserAsync">Nuevo usuario</button>
+    </div>
+
+    @if(!string.IsNullOrWhiteSpace(StatusMessage)) {
+        <div class="@StatusCssClass">@StatusMessage</div>
+    }
+
+    @if(IsLoading) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando usuarios...</span>
+            </div>
+        </div>
+    } else {
+        <div class="admin-grid">
+            <section class="admin-card">
+                <h2>Listado</h2>
+                <div class="admin-table-shell">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Perfil</th>
+                                <th>Roles</th>
+                                <th>Claims</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var user in Users) {
+                                <tr>
+                                    <td>@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.ProfileName</td>
+                                    <td>@string.Join(", ", user.Roles)</td>
+                                    <td>@(user.Permissions.Count == 0 ? "Sin claims" : string.Join(", ", user.Permissions))</td>
+                                    <td>
+                                        <button type="button" class="admin-link-button" @onclick="@(() => EditUserAsync(user.Id))">Editar</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <h2>@(string.IsNullOrWhiteSpace(UserEditor.Id) ? "Alta de usuario" : "Modificar usuario")</h2>
+
+                <EditForm Model="@UserEditor" OnValidSubmit="SaveUserAsync" FormName="gestion-usuarios-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="admin-form-grid">
+                        <label class="admin-field">
+                            <span>Nombre completo</span>
+                            <InputText @bind-Value="UserEditor.FullName" />
+                        </label>
+
+                        <label class="admin-field">
+                            <span>Correo</span>
+                            <InputText @bind-Value="UserEditor.Email" />
+                        </label>
+
+                        <label class="admin-field">
+                            <span>Perfil</span>
+                            <InputSelect @bind-Value="UserEditor.ProfileId">
+                                <option value="">Selecciona un perfil</option>
+                                @foreach(var profile in ProfileOptions) {
+                                    <option value="@profile.Id">@profile.Name</option>
+                                }
+                            </InputSelect>
+                        </label>
+
+                        <label class="admin-field">
+                            <span>Contrasena @(string.IsNullOrWhiteSpace(UserEditor.Id) ? "" : "(opcional para reset)")</span>
+                            <InputText @bind-Value="UserEditor.Password" type="password" />
+                        </label>
+                    </div>
+
+                    <label class="admin-toggle">
+                        <InputCheckbox @bind-Value="UserEditor.EmailConfirmed" />
+                        <span>Correo confirmado</span>
+                    </label>
+
+                    <div class="admin-subsection">
+                        <h3>Roles</h3>
+                        <div class="admin-check-grid">
+                            @foreach(var role in UserEditor.Roles) {
+                                <label class="admin-check-item">
+                                    <InputCheckbox @bind-Value="role.IsSelected" />
+                                    <span>@role.Name</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <label class="admin-field">
+                        <span>Claims del usuario</span>
+                        <InputTextArea @bind-Value="UserEditor.PermissionsText" />
+                        <small>Uno por linea. Ejemplo: <code>manufacturing:release</code></small>
+                    </label>
+
+                    <div class="admin-actions">
+                        <button type="submit" class="admin-primary-button">Guardar</button>
+                        <button type="button" class="admin-secondary-button" @onclick="PrepareNewUserAsync">Limpiar</button>
+                    </div>
+                </EditForm>
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    bool IsLoading = true;
+    string StatusMessage = string.Empty;
+    string StatusCssClass = "admin-status";
+    IReadOnlyList<GestionUserListItem> Users = [];
+    IReadOnlyList<AppProfile> ProfileOptions = [];
+    GestionUserEditor UserEditor = new();
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadAsync();
+    }
+
+    async Task ReloadAsync() {
+        IsLoading = true;
+        ProfileOptions = await GestionManagerService.GetProfileOptionsAsync();
+        Users = await GestionManagerService.GetUsersAsync();
+        UserEditor = await GestionManagerService.BuildUserEditorAsync();
+        IsLoading = false;
+    }
+
+    async Task PrepareNewUserAsync() {
+        UserEditor = await GestionManagerService.BuildUserEditorAsync();
+        StatusMessage = string.Empty;
+    }
+
+    async Task EditUserAsync(string userId) {
+        UserEditor = await GestionManagerService.BuildUserEditorAsync(userId);
+        StatusMessage = string.Empty;
+    }
+
+    async Task SaveUserAsync() {
+        var result = await GestionManagerService.SaveUserAsync(UserEditor);
+        StatusMessage = result.Succeeded
+            ? result.Message
+            : $"{result.Message} {string.Join(" ", result.Errors)}".Trim();
+        StatusCssClass = result.Succeeded ? "admin-status success" : "admin-status error";
+
+        if(result.Succeeded) {
+            await ReloadAsync();
+        }
+    }
+}

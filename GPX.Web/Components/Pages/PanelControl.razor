@@ -1,0 +1,13 @@
+@page "/modulos/panel-control"
+@attribute [Authorize(Policy = "Module:PROD_DASHBOARD")]
+
+<PageTitle>Panel de control</PageTitle>
+
+<div class="block-content card">
+    <div class="title">
+        <div class="title-text">Panel de control</div>
+    </div>
+    <p>Ejemplo base de modulo autorizado por <strong>AppProfileModules</strong>. Si el perfil del usuario contiene el modulo <code>PROD_DASHBOARD</code>, la pagina aparece en el menu y se puede abrir.</p>
+
+    <ModuleAccessSummary ModuleCode="PROD_DASHBOARD" />
+</div>

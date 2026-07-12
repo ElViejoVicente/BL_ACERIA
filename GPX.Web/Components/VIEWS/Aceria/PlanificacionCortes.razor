@@ -1,0 +1,418 @@
+﻿@page "/VIEWS/Aceria/PlanificacionCortes"
+@using DevExpress.Blazor
+@using GPX.Negocio.Aceria
+@using GPX.Negocio.ORM
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "Module:PLANIFICACION_CORTES")]
+
+<PageTitle>Planificacion de Cortes</PageTitle>
+
+<div class="content-root">
+    <DxGridLayout CssClass="page-layout">
+        <Rows>
+            <DxGridLayoutRow Height="auto" />
+            <DxGridLayoutRow Height="1fr" />
+        </Rows>
+        <Columns>
+            <DxGridLayoutColumn Width="1fr" />
+        </Columns>
+        <Items>
+            <DxGridLayoutItem Row="0" Column="0" CssClass="layout-header">
+                <Template>
+                    <div class="card header-detail">
+                        <span>Version @versionHader.Version</span>
+                        <span>Periodo: @versionHader.FechaInicio.ToString("dd/MM/yyyy") - @versionHader.FechaFin.ToString("dd/MM/yyyy")</span>
+                        <span>Tundish activos: @versionHader.TundishActivos</span>
+                        <span>Coladas: @versionHader.NumeroColadas.ToString("N0")</span>
+                        <span>Barras: @versionHader.NumeroBarras.ToString("N0")</span>
+                        <span>Usuario: @versionHader.Autor</span>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="1" Column="0" CssClass="layout-content">
+                <Template>
+                    <div class="grid-wrapper">
+                        <DxLoadingPanel Visible="@IsLoading"
+                                        IsContentBlocked="true"
+                                        IsContentVisible="true"
+                                        IndicatorVisible="true"
+                                        IndicatorAreaVisible="true"
+                                        Text="Cargando...">
+                            <DxSplitter CssClass="main-splitter" Width="100%" Height="100%">
+                                <Panes>
+                                    <DxSplitterPane Size="56%" MinSize="520px" AllowResize="true">
+                                        <section class="pane-content left-pane">
+                                            <div class="pane-title">Tundish y cortes</div>
+                                            <div class="tundish-master-list">
+                                                @foreach (var nodoTundish in ArbolTundish)
+                                                {
+                                                    var tundish = nodoTundish.Tundish;
+                                                    var selected = SelectedTundish?.NumTundish == tundish.NumTundish;
+                                                    <details class="tree-tundish @(selected ? "selected" : "")" open="@selected">
+                                                        <summary class="tree-row tree-tundish-row @(tundish.TundishActivo ? "" : "disabled")"
+                                                                 @onclick="() => SeleccionarTundish(tundish)">
+                                                            <span class="dot @(tundish.TundishActivo ? "green" : "red")"></span>
+                                                            <strong>@tundish.NombreTundish</strong>
+                                                            <span class="tree-muted">Vida: @tundish.HorasVida h | Coladas: @tundish.NumColadas.ToString("N0") | Inicio: @tundish.FechaInicio.ToString("dd/MM/yyyy HH:mm") | Fin: @tundish.FechaFin.ToString("dd/MM/yyyy HH:mm")</span>
+                                                        </summary>
+
+                                                        @foreach (var version in nodoTundish.Versiones)
+                                                        {
+                                                            <details class="tree-version" open="@(selected && version.Activa)">
+                                                                <summary class="tree-row tree-version-row"
+                                                                         @onclick="() => SeleccionarTundish(tundish)">
+                                                                    <span class="dot @(version.Activa ? "green" : "purple")"></span>
+                                                                    <strong>Version @version.Version</strong>
+                                                                    <span class="tree-muted">Tn: @version.Toneladas.ToString("N2") | @version.ResumenCortes</span>
+                                                                    <span class="score-pill">Score: @version.Score.ToString("N2")</span>
+                                                                </summary>
+
+                                                                @foreach (var colada in version.Coladas)
+                                                                {
+                                                                    <details class="tree-colada @(colada.EsManual ? "manual" : "")" open="@(selected && version.Activa && colada.Numero == 1)">
+                                                                        <summary class="tree-row tree-colada-row">
+                                                                            <strong>Colada @colada.Numero</strong>
+                                                                            <span>Calidad: <span class="badge-quality @GetCalidadClass(colada.Calidad)">@colada.Calidad</span> | Barras: @colada.Barras.ToString("N0") | Tn: @colada.Toneladas.ToString("N2")</span>
+                                                                            @if (colada.EsManual)
+                                                                            {
+                                                                                <span class="colada-manual-badge">Manual</span>
+                                                                            }
+                                                                            @if (colada.Cerrada)
+                                                                            {
+                                                                                <span class="colada-closed-badge">Cerrada</span>
+                                                                            }
+                                                                            @if (colada.PuedeFinalizar)
+                                                                            {
+                                                                                <span class="colada-actions" @onclick:stopPropagation="true">
+                                                                                    <DxButton Text="Finalizar Colada"
+                                                                                              RenderStyle="ButtonRenderStyle.Danger"
+                                                                                              SizeMode="SizeMode.Small"
+                                                                                              Click="@(() => OnFinalizarColadaClick(colada))" />
+                                                                                </span>
+                                                                            }
+                                                                        </summary>
+                                                                        <div class="tree-detail">
+                                                                            <div class="tree-detail-title">Perfiles y barras</div>
+                                                                            <DxGrid Data="@colada.Perfiles"
+                                                                                    CssClass="grid-tree-detail"
+                                                                                    PageSize="@int.MaxValue"
+                                                                                    PagerVisible="false"
+                                                                                    EditMode="GridEditMode.EditRow"
+                                                                                    EditModelSaving="OnAsignacionEditModelSaving"
+                                                                                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                                                    TextWrapEnabled="false"
+                                                                                    HighlightRowOnHover="true">
+                                                                                <Columns>
+                                                                                    @if (!colada.Cerrada)
+                                                                                    {
+                                                                                        <DxGridCommandColumn Width="64px" NewButtonVisible="false" DeleteButtonVisible="false" />
+                                                                                    }
+                                                                                    <DxGridDataColumn FieldName="@nameof(CorteAsignacionVm.TipoSemi)" Caption="Tipo" Width="78px">
+                                                                                        <CellDisplayTemplate Context="cellContext">
+                                                                                            @{
+                                                                                                var row = (CorteAsignacionVm)cellContext.DataItem;
+                                                                                            }
+                                                                                            <span class="grid-badge @GetTipoBadgeClass(row.TipoSemi)">@GetTipoDisplay(row)</span>
+                                                                                        </CellDisplayTemplate>
+                                                                                    </DxGridDataColumn>
+                                                                                    <DxGridDataColumn FieldName="@nameof(CorteAsignacionVm.Linea)" Caption="Linea" Width="58px" ReadOnly="true" />
+                                                                                    <DxGridDataColumn FieldName="@nameof(CorteAsignacionVm.Longitud)" Caption="Longitud" DisplayFormat="n0" Width="82px">
+                                                                                        <CellDisplayTemplate Context="cellContext">
+                                                                                            @{
+                                                                                                var row = (CorteAsignacionVm)cellContext.DataItem;
+                                                                                            }
+                                                                                            <span class="@(row.LongitudModificada ? "modified-value" : "")">@row.Longitud.ToString("N0")</span>
+                                                                                        </CellDisplayTemplate>
+                                                                                    </DxGridDataColumn>
+                                                                                    <DxGridDataColumn FieldName="@nameof(CorteAsignacionVm.BarrasAsignadas)" Caption="Barras" DisplayFormat="n0" Width="70px" ReadOnly="true" />
+                                                                                    <DxGridDataColumn FieldName="@nameof(CorteAsignacionVm.BarrasFabricadas)" Caption="Produccion" DisplayFormat="n0" Width="92px" />
+                                                                                    <DxGridDataColumn FieldName="@nameof(CorteAsignacionVm.ToneladasAsignadas)" Caption="Tn. Totales" DisplayFormat="n2" Width="86px" ReadOnly="true" />
+                                                                                </Columns>
+                                                                            </DxGrid>
+                                                                        </div>
+                                                                    </details>
+                                                                }
+                                                            </details>
+                                                        }
+                                                    </details>
+                                                }
+                                            </div>
+                                        </section>
+                                    </DxSplitterPane>
+
+                                    <DxSplitterPane MinSize="620px" AllowResize="true">
+                                        <div class="right-top">
+                                                        <section class="pane-content config-pane">
+                                                            <div class="pane-title">Configuracion del tundish@(SelectedTundish is null ? string.Empty : $" - {SelectedTundish.NombreTundish}")</div>
+                                                            @if (SelectedTundish is null)
+                                                            {
+                                                                <div class="empty-state">Selecciona un tundish para ver su configuracion.</div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="tundish-config-card">
+                                                                    <div class="config-headline">
+                                                                        <div class="config-selector">
+                                                                            <label>Tundish</label>
+                                                                            <DxComboBox Data="@TundishSelectorItems"
+                                                                                        Value="@SelectedTundishValue"
+                                                                                        ValueChanged="@((int value) => OnSelectedTundishValueChanged(value))"
+                                                                                        ValueFieldName="@nameof(TundishSelectorItem.NumTundish)"
+                                                                                        TextFieldName="@nameof(TundishSelectorItem.DisplayText)"
+                                                                                        Width="100%" />
+                                                                        </div>
+                                                                        <div class="metric-box"><span>Vida</span><strong>@SelectedTundish.HorasVida</strong></div>
+                                                                        <div class="metric-box coladas-metric">
+                                                                            <div><span>Col.</span><strong>@SelectedTundish.NumColadas.ToString("N2")</strong></div>
+                                                                            <div class="coladas-actions">
+                                                                                <DxButton Text="+"
+                                                                                          RenderStyle="ButtonRenderStyle.Secondary"
+                                                                                          SizeMode="SizeMode.Small"
+                                                                                          CssClass="colada-step-button"
+                                                                                          Click="OnAumentarColadasClick" />
+                                                                                <DxButton Text="-"
+                                                                                          RenderStyle="ButtonRenderStyle.Secondary"
+                                                                                          SizeMode="SizeMode.Small"
+                                                                                          CssClass="colada-step-button"
+                                                                                          Click="OnDisminuirColadasClick"
+                                                                                          Enabled="@(SelectedTundish.NumColadas > 0)" />
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="metric-box"><span>Min/col</span><strong>@SelectedTundish.MinutosXColada.ToString("N2")</strong></div>
+                                                                        <div class="active-toggle">
+                                                                            <DxCheckBox Checked="@SelectedTundish.TundishActivo"
+                                                                                        CheckedChanged="@((bool value) => OnTundishActivoChanged(value))"
+                                                                                        ValidationEnabled="false" />
+                                                                            <span>Activo</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="config-detail-grid">
+                                                                        <div class="bocas-grid">
+                                                                            @for (var boca = 1; boca <= 6; boca++)
+                                                                            {
+                                                                                var numeroBoca = boca;
+                                                                                var data = GetBoca(numeroBoca);
+                                                                                <div class="boca-card">
+                                                                                    <div class="boca-tipo @GetTipoCss(data.Tipo)" style="background-color:@GetEstadoColor(data.Estado)">@data.Tipo</div>
+                                                                                    <DxComboBox Data="@EstadosBoca"
+                                                                                                Value="@data.Estado"
+                                                                                                ValueChanged="@((string value) => OnEstadoBocaChanged(numeroBoca, value))"
+                                                                                                ValueFieldName="@nameof(BocaEstadoOption.Value)"
+                                                                                                TextFieldName="@nameof(BocaEstadoOption.Text)"
+                                                                                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Never"
+                                                                                                Width="100%" />
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+
+                                                                        <table class="rendimiento-table">
+                                                                            <thead>
+                                                                                <tr><th class="bb1">BB1</th><th class="bb2">BB2</th><th class="bb3">BB3</th></tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr><td>@SelectedTundish.TnXColadaBB1.ToString("N2")</td><td>@SelectedTundish.TnXColadaBB2.ToString("N2")</td><td>@SelectedTundish.TnXColadaBB3.ToString("N2")</td></tr>
+                                                                                <tr><td>@((SelectedTundish.NumColadas * SelectedTundish.TnXColadaBB1).ToString("N2"))</td><td>@((SelectedTundish.NumColadas * SelectedTundish.TnXColadaBB2).ToString("N2"))</td><td>@((SelectedTundish.NumColadas * SelectedTundish.TnXColadaBB3).ToString("N2"))</td></tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </section>
+
+                                                        <section class="pane-content detail-tabs-pane">
+                                                            <DxTabs @bind-ActiveTabIndex="@DetalleTabIndex" CssClass="detail-tabs">
+                                                                <DxTab Text="Corte por calidad"></DxTab>
+                                                                <DxTab Text="Versiones"></DxTab>
+                                                                <DxTab Text="Comparativa"></DxTab>
+                                                            </DxTabs>
+
+                                                            @if (DetalleTabIndex == 0)
+                                                            {
+                                                                <div class="resumen-grid-host">
+                                                                    <DxGrid Data="@ResumenCorteActual"
+                                                                            CssClass="grid-resumen"
+                                                                            KeyFieldName="@nameof(CorteResumenVm.Id)"
+                                                                            PageSize="@int.MaxValue"
+                                                                            PagerVisible="false"
+                                                                            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                                            TextWrapEnabled="false"
+                                                                            HighlightRowOnHover="true"
+                                                                            VirtualScrollingEnabled="true"
+                                                                            style="height:100%;">
+                                                                        <Columns>
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.TipoSemi)" Caption="Tipo" Width="58px" ReadOnly="true">
+                                                                                <CellDisplayTemplate Context="cellContext">
+                                                                                    @{
+                                                                                        var row = (CorteResumenVm)cellContext.DataItem;
+                                                                                    }
+                                                                                    <span class="grid-badge @GetTipoBadgeClass(row.TipoSemi)">@row.TipoSemi</span>
+                                                                                </CellDisplayTemplate>
+                                                                            </DxGridDataColumn>
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.Calidad)" Caption="Calidad" Width="86px" ReadOnly="true">
+                                                                                <CellDisplayTemplate Context="cellContext">
+                                                                                    @{
+                                                                                        var row = (CorteResumenVm)cellContext.DataItem;
+                                                                                    }
+                                                                                    <span class="grid-badge @GetCalidadClass(row.Calidad)">@row.Calidad</span>
+                                                                                </CellDisplayTemplate>
+                                                                            </DxGridDataColumn>
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.FechaPrevista)" Caption="Fecha Prevista" DisplayFormat="dd/MM/yyyy" Width="106px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.Longitud)" Caption="Long." DisplayFormat="n0" Width="72px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.NecesidadBarras)" Caption="Neces." DisplayFormat="n0" Width="74px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.AsignadasBarras)" Caption="Asign." DisplayFormat="n0" Width="74px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.FabricadasBarras)" Caption="Fab." DisplayFormat="n0" Width="68px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.PendientesBarras)" Caption="Pend." DisplayFormat="n0" Width="68px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.ToneladasNecesidad)" Caption="Tn nec." DisplayFormat="n2" Width="78px" ReadOnly="true" />
+                                                                            <DxGridDataColumn FieldName="@nameof(CorteResumenVm.ToneladasAsignadas)" Caption="Tn asig." DisplayFormat="n2" Width="78px" ReadOnly="true" />
+                                                                        </Columns>
+                                                                        <DetailRowTemplate Context="detalleResumenContext">
+                                                                            @{
+                                                                                var resumen = (CorteResumenVm)detalleResumenContext.DataItem;
+                                                                            }
+                                                                            <div class="resumen-detail-origin">
+                                                                                <div class="tree-detail-title">Origen de necesidad</div>
+                                                                                <DxGrid Data="@resumen.DetallesOrigen"
+                                                                                        KeyFieldName="@nameof(CorteResumenDetalleOrigenVm.Id)"
+                                                                                        CssClass="grid-resumen-origen"
+                                                                                        PageSize="@int.MaxValue"
+                                                                                        PagerVisible="false"
+                                                                                        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                                                        TextWrapEnabled="false"
+                                                                                        HighlightRowOnHover="true">
+                                                                                    <Columns>
+                                                                                        <DxGridDataColumn FieldName="@nameof(CorteResumenDetalleOrigenVm.Familia)" Caption="Familia" MinWidth="150" />
+                                                                                        <DxGridDataColumn FieldName="@nameof(CorteResumenDetalleOrigenVm.LongitudPT)" Caption="Longitud PT" DisplayFormat="n0" Width="105px" />
+                                                                                        <DxGridDataColumn FieldName="@nameof(CorteResumenDetalleOrigenVm.Necesidad)" Caption="Necesidad" DisplayFormat="n0" Width="105px" />
+                                                                                        <DxGridDataColumn FieldName="@nameof(CorteResumenDetalleOrigenVm.FechaNecesidad)" Caption="Fecha Necesidad" DisplayFormat="dd/MM/yyyy" Width="130px" />
+                                                                                    </Columns>
+                                                                                </DxGrid>
+                                                                            </div>
+                                                                        </DetailRowTemplate>
+                                                                    </DxGrid>
+                                                                </div>
+                                                            }
+                                                            else if (DetalleTabIndex == 1)
+                                                            {
+                                                                <div class="version-tab-content">
+                                                                    <div class="version-actions">
+                                                                        <DxComboBox Data="@VersionesCorte"
+                                                                                    Value="@VersionCorteActiva"
+                                                                                    ValueChanged="@((string value) => OnVersionCorteChanged(value))"
+                                                                                    ValueFieldName="@nameof(CorteVersionVm.Clave)"
+                                                                                    TextFieldName="@nameof(CorteVersionVm.Nombre)"
+                                                                                    Width="220px" />
+                                                                        <DxButton Text="Nueva version"
+                                                                                  IconCssClass="plus-icon icon medium-icon"
+                                                                                  RenderStyle="ButtonRenderStyle.Primary"
+                                                                                  Click="OnNuevaVersionClick"
+                                                                                  Enabled="@(VersionesCorte.Count < 5)" />
+                                                                        <DxButton Text="Eliminar"
+                                                                                  IconCssClass="trash-icon icon medium-icon"
+                                                                                  RenderStyle="ButtonRenderStyle.Secondary"
+                                                                                  Click="OnEliminarVersionClick"
+                                                                                  Enabled="@PuedeEliminarVersionActiva" />
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="comparativa-tab-content">
+                                                                    <DxGrid Data="@ComparativaVersiones"
+                                                                            CssClass="grid-comparativa"
+                                                                            PageSize="@int.MaxValue"
+                                                                            PagerVisible="false"
+                                                                            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                                            TextWrapEnabled="false"
+                                                                            HighlightRowOnHover="true"
+                                                                            VirtualScrollingEnabled="true"
+                                                                            style="height:100%;">
+                                                                        <Columns>
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.Version)" Caption="Version" Width="80px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.AjusteCalidad)" Caption="Calidad" DisplayFormat="n2" Width="86px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.AjusteMedida)" Caption="Medida" DisplayFormat="n2" Width="86px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.CambiosCalidad)" Caption="Cambios" DisplayFormat="n2" Width="86px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.YieldEstimado)" Caption="Yield" DisplayFormat="n2" Width="86px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.TundishConsumidos)" Caption="Tundish" DisplayFormat="n2" Width="86px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.DeficitCalidad)" Caption="Deficit" DisplayFormat="n2" Width="86px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.Sobreproduccion)" Caption="Sobreprod." DisplayFormat="n2" Width="98px" />
+                                                                            <DxGridDataColumn FieldName="@nameof(ComparativaVersionVm.ScoreTotal)" Caption="Score" DisplayFormat="n2" Width="90px" />
+                                                                        </Columns>
+                                                                    </DxGrid>
+                                                                </div>
+                                                            }
+                                                        </section>
+                                        </div>
+                                    </DxSplitterPane>
+                                </Panes>
+                            </DxSplitter>
+                        </DxLoadingPanel>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        </Items>
+    </DxGridLayout>
+</div>
+
+<DxPopup @bind-Visible="@PopupColadaManualVisible"
+         HeaderText="Agregar colada manual"
+         Width="860px"
+         MaxWidth="95vw"
+         ShowFooter="true"
+         CloseOnEscape="true"
+         CssClass="app-popup manual-colada-popup">
+    <BodyContentTemplate Context="manualPopupContext">
+        <div class="manual-colada-body">
+            <div class="manual-colada-header">
+                <span>@ColadaManualEdit.NombreTundish</span>
+                <span>Colada @ColadaManualEdit.NumColada</span>
+                <span>Version @ColadaManualEdit.Version</span>
+            </div>
+
+            <DxFormLayout CssClass="manual-colada-form">
+                <DxFormLayoutItem Caption="Calidad" ColSpanMd="4">
+                    <DxComboBox Data="@versionHader.AllCalidades"
+                                @bind-Value="@ColadaManualEdit.Calidad"
+                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Never"
+                                Width="100%" />
+                </DxFormLayoutItem>
+            </DxFormLayout>
+
+            <DxGrid Data="@ColadaManualEdit.Lineas"
+                    KeyFieldName="@nameof(ManualColadaLineaVm.Linea)"
+                    CssClass="grid-manual-colada"
+                    EditMode="GridEditMode.EditCell"
+                    PageSize="@int.MaxValue"
+                    PagerVisible="false"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                    TextWrapEnabled="false">
+                <Columns>
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.Linea)" Caption="Linea" Width="70px" ReadOnly="true" />
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.TipoSemi)" Caption="Tipo" Width="90px" ReadOnly="true">
+                        <CellDisplayTemplate Context="manualCell">
+                            @{
+                                var row = (ManualColadaLineaVm)manualCell.DataItem;
+                            }
+                            <span class="grid-badge @GetTipoBadgeClass(row.TipoSemi)">@row.TipoSemi</span>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.Estado)" Caption="Estado" Width="105px" ReadOnly="true" />
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.Longitud)" Caption="Longitud" DisplayFormat="n0" Width="110px" ReadOnly="false" />
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.Barras)" Caption="Barras" DisplayFormat="n0" Width="95px" ReadOnly="false" />
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.Produccion)" Caption="Produccion" DisplayFormat="n0" Width="110px" ReadOnly="false" />
+                    <DxGridDataColumn FieldName="@nameof(ManualColadaLineaVm.Toneladas)" Caption="Tn. Totales" DisplayFormat="n2" Width="115px" ReadOnly="false" />
+                </Columns>
+            </DxGrid>
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate Context="manualPopupFooterContext">
+        <DxButton Text="Cancelar"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  Click="OnCancelarColadaManualClick" />
+        <DxButton Text="Guardar colada"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  Click="OnGuardarColadaManualClick" />
+    </FooterContentTemplate>
+</DxPopup>

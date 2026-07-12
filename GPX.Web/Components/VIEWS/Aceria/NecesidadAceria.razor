@@ -1,0 +1,198 @@
+﻿@page "/VIEWS/Aceria/NecesidadAceria"
+@using GPX.Negocio.Aceria
+@using GPX.Negocio.ORM
+@using GPX.Negocio.COP
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "Module:NECESIDADES_ACERIA")]
+
+<PageTitle>Necesidades Aceria</PageTitle>
+
+<div class="content-root">
+    <DxGridLayout CssClass="page-layout">
+        <Rows>
+            <DxGridLayoutRow Height="auto" />
+            <DxGridLayoutRow Height="1fr" />
+            <DxGridLayoutRow Height="auto" />
+        </Rows>
+        <Columns>
+            <DxGridLayoutColumn Width="1fr" />
+        </Columns>
+
+        <Items>
+            <DxGridLayoutItem Row="0" Column="0" CssClass="layout-header">
+                <Template>
+                    <div class="card toolbar">
+                        <DxToolbar Title="Opciones" ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+                            <DxToolbarItem Text="Maquina" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
+                                <Template>
+                                    <DxComboBox Data="@ListaCentros"
+                                                @bind-Value="MaquinaSeleccionada"
+                                                ValueFieldName="@nameof(CentrosXsociedad.csCodCentro)"
+                                                TextFieldName="@nameof(CentrosXsociedad.csNombre)"
+                                                NullText="Seleccione un centro..."
+                                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                </Template>
+                            </DxToolbarItem>
+
+                            <DxToolbarItem Alignment="ToolbarItemAlignment.Left">
+                                <Template Context="item">
+                                    <DxButton Text="Actualizar"
+                                              IconCssClass="refresh-icon icon medium-icon"
+                                              RenderStyle="ButtonRenderStyle.Primary"
+                                              Click="OnConsultarClick" />
+                                </Template>
+                            </DxToolbarItem>
+
+                            <DxToolbarItem Tooltip="Column Chooser"
+                                           Alignment="ToolbarItemAlignment.Right"
+                                           Click="OnColumnChooserItemClick"
+                                           IconCssClass="column-chooser-icon icon medium-icon" />
+
+                            <DxToolbarItem Text="Exportar"
+                                           Alignment="ToolbarItemAlignment.Right"
+                                           IconCssClass="export-icon icon medium-icon">
+                                <Items>
+                                    <DxToolbarItem Text="Export all data to Excel" Click="ExportAllDataToExcel" />
+                                    <DxToolbarItem Text="Export all data to CSV" Click="ExportAllDataToCsv" />
+                                    <DxToolbarItem Text="Export all data to PDF" Click="ExportAllDataToPdf" />
+                                </Items>
+                            </DxToolbarItem>
+
+                   
+                        </DxToolbar>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="1" Column="0" CssClass="layout-content">
+                <Template>
+                    <div class="grid-wrapper">
+                        <DxLoadingPanel Visible="@IsLoading"
+                                        IsContentBlocked="true"
+                                        IsContentVisible="true"
+                                        IndicatorVisible="true"
+                                        IndicatorAreaVisible="true"
+                                        ZIndex="101"
+                                        Text="Cargando...">
+
+                            <DxGrid @ref="gvNececiadesAceria"
+                                    Data="@ListaNecesidadesBeamBlanksAgrupago"
+                                    CustomizeElement="OnGridCustomizeElement"
+                                    KeyFieldName="numRegistro"
+                                    SearchText="@SearchText"
+                                    ShowFilterRow="true"
+                                    ShowSearchBox="true"
+                                    AutoExpandAllGroupRows="true"
+                                    SkeletonRowsEnabled="false"
+                                    HighlightRowOnHover="true"
+                                    TextWrapEnabled="false"
+                                    FocusedRowEnabled="true"
+                                    VirtualScrollingEnabled="true"
+                                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                                    CssClass="grid-necesidades"
+                                    style="height:100%;">
+
+                                <Columns>
+                                    <DxGridDataColumn FieldName="IdFab" Caption="IdFab" Visible="false" />
+                                    <DxGridDataColumn FieldName="NombreSemana" Caption=" " GroupIndex="0" />
+                                    <DxGridDataColumn FieldName="MatSemi" Caption="Tipo" GroupIndex="1" />
+                                    <DxGridDataColumn FieldName="CalidadSemi" Caption="Calidad" GroupIndex="2" Name="CalidadSemi" />
+                                    <DxGridDataColumn FieldName="CalidadSemiLong" Caption="Calidad Semi" Name="CalidadSemiLong" />
+                                    <DxGridDataColumn FieldName="LongitudSemi" Caption="LongitudSemi" />
+                                    <DxGridDataColumn FieldName="TnsAFabSemi" Caption="Tn. A Fabricar Semi" DisplayFormat="n2" />
+                                    <DxGridDataColumn FieldName="UdsAFabSemi" Caption="N.BB" DisplayFormat="n2" />
+                                    <DxGridDataColumn FieldName="FechaPrevIni" Caption="FechaPrevIni" Visible="false" />
+                                </Columns>
+
+                                <GroupSummary>
+                                    <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum"
+                                                       FieldName="TnsAFabSemi"
+                                                       FooterColumnName="TnsAFabSemi"
+                                                       DisplayText="Tn Total: {0:n2}" />
+                                    <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum"
+                                                       FieldName="UdsAFabSemi"
+                                                       FooterColumnName="UdsAFabSemi"
+                                                       DisplayText="N.BB Total: {0:n2}" />
+                                </GroupSummary>
+
+                                <DetailRowTemplate Context="detailContext">
+                                    @{
+                                        var row = (BeamBlankNecesidad)detailContext.DataItem;
+                                        var detalle = ObtenerDetalle(row);
+                                    }
+
+                                    <DxGrid Data="@detalle"
+                                            KeyFieldName="IdFab"
+                                            ShowAllRows="true">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="IdFab" Caption="IdFab" />
+                                            <DxGridDataColumn FieldName="Familia" Caption="Familia" />
+                                            <DxGridDataColumn FieldName="Calidad" Caption="Calidad" />
+                                            <DxGridDataColumn FieldName="TnsAFabSemi" Caption="Tn. A Fabricar Semi" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="UdsAFabSemi" Caption="N.BB" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="FechaPrevIni" Caption="FechaPrevIni" DisplayFormat="dd/MM/yyyy" />
+                                        </Columns>
+
+                                        <TotalSummary>
+                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum"
+                                                               FieldName="TnsAFabSemi"
+                                                               FooterColumnName="TnsAFabSemi"
+                                                               DisplayText="Total: {0:n2}" />
+                                            <DxGridSummaryItem SummaryType="GridSummaryItemType.Sum"
+                                                               FieldName="UdsAFabSemi"
+                                                               FooterColumnName="UdsAFabSemi"
+                                                               DisplayText="Total: {0:n2}" />
+                                        </TotalSummary>
+                                    </DxGrid>
+                                </DetailRowTemplate>
+                            </DxGrid>
+
+                        </DxLoadingPanel>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+
+            <DxGridLayoutItem Row="2" Column="0" CssClass="layout-footer">
+                <Template>
+                    <div class="calidad-legend-footer">
+                        <div class="legend-title">
+                            <span class="legend-title-dot"></span>
+                            <span>Leyenda de calidades</span>
+                        </div>
+
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <span class="legend-color color-s355ti"></span>
+                                <span class="legend-text">S355-TI</span>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color color-s355v"></span>
+                                <span class="legend-text">S355-V</span>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color color-s355w"></span>
+                                <span class="legend-text">S355W</span>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color color-s460a"></span>
+                                <span class="legend-text">S460A</span>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color color-s275ti"></span>
+                                <span class="legend-text">S275-TI</span>
+                            </div>
+                        </div>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        </Items>
+    </DxGridLayout>
+</div>
+
+                           

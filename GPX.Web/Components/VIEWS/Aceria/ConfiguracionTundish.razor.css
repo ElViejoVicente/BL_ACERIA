@@ -1,0 +1,921 @@
+﻿.content-root,
+.page-layout,
+.layout-content,
+.grid-wrapper,
+.config-splitter {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.layout-header,
+.layout-content {
+    min-width: 0;
+}
+
+.toolbar {
+    position: relative;
+    padding: 8px 10px;
+    overflow: hidden;
+}
+
+.card,
+.grid-wrapper {
+    background-color: var(--dxds-color-surface-neutral-default-rest);
+    border: 1px solid var(--dxds-color-border-neutral-default-rest);
+    border-radius: 8px;
+}
+
+
+/* =========================================================
+   DEVEXPRESS FORM LAYOUT COMPACTO
+   Compatible con tema Fluent
+   ========================================================= */
+
+::deep .form-layout-compact {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Reduce espacio interno del grid del grupo */
+::deep .dxbl-fl .dxbl-fl-gd {
+    gap: 4px 6px;
+    margin-right: -25px;
+}
+
+/* Reduce separación entre grupos */
+::deep .form-layout-compact .dxbl-fl {
+    width: 100%;
+    min-width: 0;
+    column-gap: 6px !important;
+    row-gap: 4px !important;
+    margin-right: -25px;
+}
+
+/* Card del grupo */
+::deep .form-layout-compact .dxbl-fl-g {
+    padding: 4px 6px 6px;
+    border-radius: 7px;
+}
+
+/* Título del grupo: Filtros / Operaciones */
+::deep .form-layout-compact .dxbl-fl-gc {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 4px;
+    margin-bottom: 1px;
+}
+
+/* Reduce espacio interno del grid del grupo */
+::deep .form-layout-compact .dxbl-fl-g > .dxbl-fl-gd {
+    gap: 4px 6px;
+}
+
+/* Caption de cada item */
+::deep .form-layout-compact .dxbl-fl-cpt {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Item */
+::deep .form-layout-compact .dxbl-fl-i {
+    margin-bottom: 2px;
+}
+
+/* Contenedor del control */
+::deep .form-layout-compact .dxbl-fl-ctrl {
+    min-width: 0;
+}
+
+/* Inputs y botones */
+::deep .form-layout-compact .dxbl-edit,
+::deep .form-layout-compact .dxbl-btn {
+    min-height: 26px;
+}
+
+/* Texto interno */
+::deep .form-layout-compact .dxbl-edit-input {
+    font-size: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* Botones */
+::deep .form-layout-compact .dxbl-btn {
+    padding: 2px 9px;
+    font-size: 11px;
+    line-height: 1.1;
+}
+
+/* CheckBox */
+::deep .form-layout-compact .dxbl-checkbox {
+    min-height: 26px;
+    align-items: center;
+}
+
+
+
+
+
+
+/* =========================================================
+   HEADER / TOOLBAR
+   ========================================================= */
+
+.toolbar-shell {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 0.95fr) minmax(420px, 1.05fr) minmax(520px, 1.35fr);
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+}
+
+.toolbar-card {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    border: 1px solid #d9dee8;
+    border-radius: 10px;
+    background: #fff;
+    padding: 6px 8px;
+    overflow: hidden;
+}
+
+.toolbar-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.toolbar-row-bottom {
+    margin-top: 5px;
+}
+
+.toolbar-card-title {
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #334155;
+    line-height: 1;
+}
+
+.toolbar-field {
+    min-width: 0;
+}
+
+    .toolbar-field label,
+    .toolbar-field span {
+        display: block;
+        margin-bottom: 4px;
+        color: #475467;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+.toolbar-field-date {
+    width: 108px;
+}
+
+.toolbar-field-version {
+    width: 190px;
+    min-width: 170px;
+}
+
+.toolbar-field-estandar {
+    width: 210px;
+    min-width: 180px;
+}
+
+.toolbar-action-slot {
+    display: flex;
+    align-items: flex-end;
+    min-height: 42px;
+}
+
+.toolbar-action-slot-main {
+    margin-left: 0;
+}
+
+.toolbar-actions-row {
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   COMBOBOX COMPACTO
+   ========================================================= */
+
+::deep .combo-compact .dxbl-edit-input {
+    font-size: 8px;
+    line-height: 1.1;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* Texto seleccionado */
+::deep .combo-compact .dxbl-edit-display-text {
+    font-size: 8px;
+}
+
+/* Botón dropdown */
+::deep .combo-compact .dxbl-btn {
+    min-width: 24px;
+    width: 24px;
+}
+
+/* Altura general */
+::deep .combo-compact .dxbl-edit {
+    min-height: 26px;
+}
+
+/* Popup items */
+::deep .dxbl-dropdown .dxbl-listbox-item {
+    font-size: 8px;
+    padding-top: 3px;
+    padding-bottom: 4px;
+}
+
+/* =========================================================
+   CARD CONFIGURACION
+   ========================================================= */
+
+.toolbar-card-produccion {
+    padding: 6px 8px;
+    overflow: hidden;
+}
+
+    .toolbar-card-produccion table {
+        width: 100%;
+        table-layout: fixed;
+        font-size: 10px;
+    }
+
+    .toolbar-card-produccion th,
+    .toolbar-card-produccion td {
+        padding: 2px 4px;
+        line-height: 1.1;
+        white-space: nowrap;
+        width: 50px;
+    }
+
+        .toolbar-card-produccion th:first-child,
+        .toolbar-card-produccion td:first-child {
+            width: 90px;
+        }
+
+
+
+
+/* =========================================================
+   ESTADO VERSION
+   ========================================================= */
+
+.toolbar-card-kpis .estado-version {
+    top: 8px;
+    right: 8px;
+}
+
+.estado-version {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 0;
+    color: transparent;
+    pointer-events: auto;
+    z-index: 2;
+}
+
+    .estado-version::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+    }
+
+.estado-ok {
+    background: #e9f8ef;
+    border: 1px solid #8fd8af;
+}
+
+    .estado-ok::before {
+        background: #22a06b;
+    }
+
+.estado-warning {
+    background: #ffefee;
+    border: 1px solid #f0a8a1;
+    animation: pulse-unsaved 1.6s ease-in-out infinite;
+}
+
+    .estado-warning::before {
+        background: #d92d20;
+    }
+
+@keyframes pulse-unsaved {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(217, 45, 32, .36);
+    }
+
+    60% {
+        box-shadow: 0 0 0 8px rgba(217, 45, 32, 0);
+    }
+}
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+.pane-content {
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    padding: 8px;
+    background-color: var(--dxds-color-surface-neutral-default-rest);
+    color: var(--dxds-color-content-neutral-default-rest);
+}
+
+.tundish-pane,
+.detail-grid {
+    overflow: hidden;
+}
+
+.tundish-list {
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+    gap: 12px;
+    align-content: start;
+}
+
+::deep .tundish-list .tundish-card {
+    margin-bottom: 0;
+    padding: 10px;
+}
+
+::deep .tundish-list .tundish-head {
+    grid-template-columns: minmax(290px, 1fr) repeat(3, minmax(80px, auto)) 84px;
+    gap: 10px;
+}
+
+::deep .tundish-list .metric {
+    padding: 6px 8px;
+    border-radius: 6px;
+}
+
+    ::deep .tundish-list .metric strong {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+::deep .tundish-list .tundish-body {
+    grid-template-columns: minmax(330px, 1fr) 240px;
+    gap: 10px;
+}
+
+::deep .tundish-list .rendimiento-grid {
+    min-width: 240px;
+    font-size: 12px;
+}
+
+    ::deep .tundish-list .rendimiento-grid > div {
+        padding: 4px 7px;
+        line-height: 1.2;
+        font-weight: 600;
+    }
+
+.right-pane {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 10px;
+}
+
+.pane-title {
+    padding: 5px 8px;
+    margin: -8px -8px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dxds-color-content-neutral-default-rest);
+    background-color: var(--dxds-color-surface-neutral-secondary-rest);
+    border-bottom: 1px solid var(--dxds-color-border-neutral-default-rest);
+}
+
+/* =========================================================
+   TABLAS COMPACTAS - LIGHT / DARK DEVEXPRESS FLUENT
+   ========================================================= */
+
+.compact-table {
+    width: 100%;
+    overflow: hidden;
+    color: var(--dxbl-color, inherit);
+}
+
+    .compact-table table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 10px;
+    }
+
+    .compact-table th,
+    .compact-table td {
+        border: 1px solid var(--dxbl-border-color, var(--dxds-color-border-neutral-default-rest));
+        padding: 2px 4px;
+        line-height: 1.05;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .compact-table th {
+        background-color: var(--dxbl-grid-header-bg, var(--dxds-color-surface-neutral-default-rest));
+        color: var(--dxbl-color, inherit);
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .compact-table td {
+        background-color: var(--dxds-color-surface-neutral-default-rest);
+        color: var(--dxbl-color, inherit);
+        text-align: right;
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+    }
+
+        .compact-table th:first-child,
+        .compact-table td:first-child {
+            width: 80px;
+            text-align: left;
+        }
+
+        .compact-table th:nth-child(2),
+        .compact-table td:nth-child(2) {
+            width: 38px;
+            text-align: center;
+        }
+
+        .compact-table th:nth-child(3),
+        .compact-table td:nth-child(3),
+        .compact-table th:nth-child(4),
+        .compact-table td:nth-child(4),
+        .compact-table th:nth-child(5),
+        .compact-table td:nth-child(5) {
+            width: 55px;
+        }
+
+        .compact-table td.bb1,
+        .compact-table th.bb1 {
+            color: #c084fc;
+            font-weight: 700;
+        }
+
+        .compact-table td.bb2,
+        .compact-table th.bb2 {
+            color: #38bdf8;
+            font-weight: 700;
+        }
+
+        .compact-table td.bb3,
+        .compact-table th.bb3 {
+            color: #4ade80;
+            font-weight: 700;
+        }
+        
+        
+        
+
+
+/* =========================================================
+   NECESIDAD / KPIS - LIGHT / DARK DEVEXPRESS FLUENT
+   ========================================================= */
+
+.necesidad-panel {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 6px;
+}
+
+/* Primera fila: BB1, BB2, BB3, Total, Col.Totales */
+.need-strip,
+.need-strip-header {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(96px, 1fr));
+    gap: 6px;
+    padding: 0;
+    width: 100%;
+    min-width: 0;
+}
+
+/* Segunda fila: solo 5 indicadores */
+.summary-row,
+.summary-row.summary-row-top {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(96px, 1fr));
+    gap: 6px;
+    margin: 0;
+    width: 100%;
+    min-width: 0;
+}
+
+    /* Base común para todos los indicadores */
+    .kpi.need,
+    .summary-row.summary-row-top > div {
+        min-width: 0;
+        min-height: 36px;
+        padding: 6px 8px;
+        border: 1px solid var(--dxds-color-border-neutral-default-rest);
+        border-radius: 7px;
+        background-color: var(--dxds-color-surface-neutral-default-rest);
+        color: var(--dxds-color-content-neutral-default-rest);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+        .kpi.need span,
+        .kpi.need strong,
+        .summary-row.summary-row-top span,
+        .summary-row.summary-row-top strong {
+            margin: 0;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .kpi.need span,
+        .summary-row.summary-row-top span {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--dxds-color-content-neutral-subtle-rest);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .kpi.need strong,
+        .summary-row.summary-row-top strong {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--dxds-color-content-neutral-default-rest);
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Solo BB1 / BB2 / BB3 llevan color */
+        .kpi.need.bb1 span,
+        .kpi.need.bb1 strong {
+            color: #c084fc;
+        }
+
+        .kpi.need.bb2 span,
+        .kpi.need.bb2 strong {
+            color: #38bdf8;
+        }
+
+        .kpi.need.bb3 span,
+        .kpi.need.bb3 strong {
+            color: #4ade80;
+        }
+
+        /* Total y Col.Totales neutros */
+        .kpi.need.total span,
+        .kpi.need.total strong,
+        .kpi.need.neutral span,
+        .kpi.need.neutral strong {
+            color: var(--dxds-color-content-neutral-default-rest);
+        }
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .need-strip,
+    .need-strip-header,
+    .summary-row,
+    .summary-row.summary-row-top {
+        grid-template-columns: repeat(3, minmax(110px, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .need-strip,
+    .need-strip-header,
+    .summary-row,
+    .summary-row.summary-row-top {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+    }
+}
+
+
+/* =========================================================
+   GRID DETALLE NECESIDAD
+   Alto ajustado al panel, sin reducir fuente
+   ========================================================= */
+
+.detail-grid-panel {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+}
+
+::deep .grid-detalle-necesidad {
+    height: 100%;
+    min-height: 0;
+}
+
+    ::deep .grid-detalle-necesidad .dxbl-grid {
+        height: 100%;
+        min-height: 0;
+    }
+
+    /* Mantiene fuente normal del tema */
+    ::deep .grid-detalle-necesidad .dxbl-grid-table > thead > tr > th,
+    ::deep .grid-detalle-necesidad .dxbl-grid-table > tbody > tr > td {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+   SOLO COLUMNA CALIDAD
+   ========================================================= */
+
+    ::deep .grid-detalle-necesidad td.calidad-s275-h {
+        background-color: #00ccff !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    ::deep .grid-detalle-necesidad td.calidad-s355-ti {
+        background-color: #e11d48 !important;
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    ::deep .grid-detalle-necesidad td.calidad-s355-v {
+        background-color: #70ad47 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    ::deep .grid-detalle-necesidad td.calidad-s355-w {
+        background-color: #f1a983 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    ::deep .grid-detalle-necesidad td.calidad-s460-a,
+    ::deep .grid-detalle-necesidad td.calidad-s460 {
+        background-color: #ffc000 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    ::deep .grid-detalle-necesidad td.calidad-s275-ti {
+        background-color: #ffff00 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+
+
+
+
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+
+.hidden-col {
+    display: none;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+
+/* =========================================================
+   GRID DISTRIBUCION
+   Compatible Light / Dark
+   ========================================================= */
+
+::deep .grid-distribucion {
+    height: 100%;
+    min-height: 0;
+}
+
+    ::deep .grid-distribucion .dxbl-grid {
+        height: 100%;
+        min-height: 0;
+    }
+
+    /* =========================================================
+   HEADERS
+   ========================================================= */
+
+    ::deep .grid-distribucion .dxbl-grid-table > thead > tr > th {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+   CELDAS
+   ========================================================= */
+
+    ::deep .grid-distribucion .dxbl-grid-table > tbody > tr > td {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+   COLUMNAS POR CALIDAD
+   SOLO COLUMNA
+   ========================================================= */
+
+    /* S275-H */
+    ::deep .grid-distribucion .col-s275-h {
+        background-color: #00ccff !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    /* S355-TI */
+    ::deep .grid-distribucion .col-s355-ti {
+        background-color: #e11d48 !important;
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    /* S355-V */
+    ::deep .grid-distribucion .col-s355-v {
+        background-color: #70ad47 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    /* S355-W */
+    ::deep .grid-distribucion .col-s355-w {
+        background-color: #f3819a !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    /* S460-A */
+    ::deep .grid-distribucion .col-s460-a {
+        background-color: #ffc000 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+    /* S275-TI */
+    ::deep .grid-distribucion .col-s275-ti {
+        background-color: #ffff00 !important;
+        color: #111 !important;
+        font-weight: 700;
+    }
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1900px) {
+    .toolbar-shell {
+        grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr) minmax(420px, 1.1fr);
+    }
+
+    .toolbar-card-kpis {
+        grid-column: 1 / -1;
+    }
+
+    .summary-row.summary-row-top {
+        grid-template-columns: repeat(6, minmax(110px, 1fr));
+    }
+}
+
+@media (max-width: 1400px) {
+    .toolbar-shell {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .toolbar-card-kpis {
+        grid-column: 1 / -1;
+    }
+
+    .toolbar-row {
+        flex-wrap: wrap;
+    }
+
+    .toolbar-actions-row {
+        justify-content: flex-start;
+    }
+
+    .need-strip-header {
+        grid-template-columns: repeat(4, minmax(90px, 1fr));
+    }
+
+    .summary-row.summary-row-top {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+    }
+
+    .tundish-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .toolbar-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .need-strip-header {
+        grid-template-columns: repeat(2, minmax(100px, 1fr));
+    }
+
+    .summary-row.summary-row-top {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+    }
+}
+
+
+/* =========================================================
+   POPUP CONFIGURACION - TABLA TAMAÑO NORMAL
+   Sobrescribe la versión compacta solo dentro del DxPopup
+   ========================================================= */
+
+.compact-table.popup-config-table {
+    padding: 4px 2px;
+}
+
+    .compact-table.popup-config-table table {
+        font-size: 14px;
+    }
+
+    .compact-table.popup-config-table th,
+    .compact-table.popup-config-table td {
+        padding: 8px 12px;
+        line-height: 1.35;
+    }
+
+    .compact-table.popup-config-table th {
+        font-size: 13px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+
+    .compact-table.popup-config-table th:first-child,
+    .compact-table.popup-config-table td:first-child {
+        width: 130px;
+    }
+
+    .compact-table.popup-config-table th:nth-child(2),
+    .compact-table.popup-config-table td:nth-child(2) {
+        width: 60px;
+    }
+
+    .compact-table.popup-config-table th:nth-child(3),
+    .compact-table.popup-config-table td:nth-child(3),
+    .compact-table.popup-config-table th:nth-child(4),
+    .compact-table.popup-config-table td:nth-child(4),
+    .compact-table.popup-config-table th:nth-child(5),
+    .compact-table.popup-config-table td:nth-child(5) {
+        width: 90px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .compact-table.popup-config-table td.total-cuchara {
+        font-size: 15px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+::deep .popup-configuracion .dxbl-popup-content {
+    padding: 14px 18px;
+}
+
+::deep .popup-configuracion .dxbl-popup-header {
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px 16px;
+}

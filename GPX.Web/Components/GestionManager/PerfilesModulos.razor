@@ -1,0 +1,182 @@
+@page "/gestion/perfiles-modulos"
+@attribute [Authorize(Policy = "Module:ADMIN_PROFILE_MODULES")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Perfiles por modulo</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Perfiles por modulo</h1>
+            <p>Define desde <code>AppProfileModules</code> que nodos del menu puede ver cada perfil.</p>
+        </div>
+    </div>
+
+    @if(!string.IsNullOrWhiteSpace(StatusMessage)) {
+        <div class="@StatusCssClass">@StatusMessage</div>
+    }
+
+@if(IsLoading) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando mapa de modulos...</span>
+            </div>
+        </div>
+    } else {
+        <div class="admin-grid single-column">
+            <section class="admin-card">
+                <div class="admin-form-grid compact">
+                    <label class="admin-field">
+                        <span>Perfil</span>
+                        <select class="admin-select" value="@GetSelectedProfileValue()" @onchange="OnProfileChangedAsync">
+                            <option value="">Selecciona un perfil</option>
+                            @foreach(var profile in Profiles) {
+                                <option value="@profile.Id">@profile.Name</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+
+                @if(Editor.ProfileId is not null) {
+                    <div class="admin-profile-summary">
+                        <div>
+                            <strong>@Editor.ProfileName</strong>
+                            <span>Perfil activo para edicion.</span>
+                        </div>
+                        <div>
+                            <strong>@SelectedModulesCount</strong>
+                            <span>modulo(s) seleccionado(s)</span>
+                        </div>
+                        <div>
+                            <strong>@GroupedModules.Count</strong>
+                            <span>nodo(s) padre</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-subsection">
+                        <h3>Arbol de modulos</h3>
+                        <p>Marca o desmarca nodos completos, o trabaja modulo por modulo. Los cambios se guardan contra <code>AppProfileModules</code>.</p>
+
+                        <div class="admin-tree">
+                            @foreach(var group in GroupedModules) {
+                                var selectedCount = group.Modules.Count(module => module.IsSelected);
+                                var allSelected = selectedCount == group.Modules.Count;
+                                var partiallySelected = selectedCount > 0 && selectedCount < group.Modules.Count;
+
+                                <section class="admin-tree-group">
+                                    <div class="admin-tree-parent">
+                                        <label class="admin-check-item parent">
+                                            <input type="checkbox"
+                                                   checked="@allSelected"
+                                                   @onchange="@(args => ToggleGroup(group, args.Value is bool isChecked && isChecked))" />
+                                            <span>@group.ParentName</span>
+                                        </label>
+                                        <span class="admin-badge">@(partiallySelected ? $"{selectedCount}/{group.Modules.Count} seleccionados" : allSelected ? "Todos seleccionados" : "Sin seleccionar")</span>
+                                    </div>
+
+                                    <div class="admin-tree-children">
+                                        @foreach(var module in group.Modules) {
+                                            <label class="admin-check-item child">
+                                                <input type="checkbox"
+                                                       checked="@module.IsSelected"
+                                                       @onchange="@(args => ToggleModule(module, args.Value is bool isChecked && isChecked))" />
+                                                <span>@module.Name</span>
+                                            </label>
+                                            <div class="admin-tree-meta">
+                                                <span class="admin-tree-code">@module.Code</span>
+                                                <span>@module.RouteLabel</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </section>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="admin-actions">
+                        <button type="button" class="admin-primary-button" @onclick="SaveAsync">Guardar cambios</button>
+                        <button type="button" class="admin-secondary-button" @onclick="ReloadCurrentProfileAsync">Recargar perfil</button>
+                        <button type="button" class="admin-secondary-button" @onclick="SelectAllModules">Seleccionar todo</button>
+                        <button type="button" class="admin-secondary-button" @onclick="ClearAllModules">Limpiar seleccion</button>
+                    </div>
+                }
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    bool IsLoading = true;
+    string StatusMessage = string.Empty;
+    string StatusCssClass = "admin-status";
+    IReadOnlyList<AppProfile> Profiles = [];
+    GestionProfileModulesEditor Editor = new();
+    IReadOnlyList<GestionProfileModuleGroup> GroupedModules = [];
+    int SelectedModulesCount => Editor.Modules.Count(module => module.IsSelected);
+
+    protected override async Task OnInitializedAsync() {
+        Profiles = await GestionManagerService.GetProfileOptionsAsync();
+        await LoadProfileAsync(Profiles.FirstOrDefault()?.Id);
+        IsLoading = false;
+    }
+
+    string GetSelectedProfileValue() => Editor.ProfileId?.ToString() ?? string.Empty;
+
+    async Task OnProfileChangedAsync(ChangeEventArgs args) {
+        int? profileId = null;
+        var rawValue = args.Value?.ToString();
+        if(int.TryParse(rawValue, out var parsedId)) {
+            profileId = parsedId;
+        }
+
+        await LoadProfileAsync(profileId);
+        StatusMessage = string.Empty;
+    }
+
+    async Task LoadProfileAsync(int? profileId) {
+        Editor = await GestionManagerService.BuildProfileModulesEditorAsync(profileId);
+        GroupedModules = GestionManagerService.GroupModules(Editor);
+    }
+
+    void ToggleGroup(GestionProfileModuleGroup group, bool isSelected) {
+        foreach(var module in group.Modules) {
+            module.IsSelected = isSelected;
+        }
+    }
+
+    void ToggleModule(GestionSelectableModule module, bool isSelected) {
+        module.IsSelected = isSelected;
+    }
+
+    void SelectAllModules() {
+        foreach(var module in Editor.Modules) {
+            module.IsSelected = true;
+        }
+    }
+
+    void ClearAllModules() {
+        foreach(var module in Editor.Modules) {
+            module.IsSelected = false;
+        }
+    }
+
+    async Task ReloadCurrentProfileAsync() {
+        await LoadProfileAsync(Editor.ProfileId);
+        StatusMessage = "Perfil recargado desde la base de datos.";
+        StatusCssClass = "admin-status";
+    }
+
+    async Task SaveAsync() {
+        var result = await GestionManagerService.SaveProfileModulesAsync(Editor);
+        StatusMessage = result.Succeeded
+            ? result.Message
+            : $"{result.Message} {string.Join(" ", result.Errors)}".Trim();
+        StatusCssClass = result.Succeeded ? "admin-status success" : "admin-status error";
+
+        if(result.Succeeded) {
+            await LoadProfileAsync(Editor.ProfileId);
+        }
+    }
+}

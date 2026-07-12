@@ -1,0 +1,79 @@
+@page "/gestion/usuarios-por-rol"
+@attribute [Authorize(Policy = "Module:ADMIN_ROLE_USERS")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Usuarios por rol</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Usuarios por rol</h1>
+            <p>Consulta rapida para revisar que usuarios pertenecen a cada rol y que permisos heredan por <code>AspNetRoleClaims</code>.</p>
+        </div>
+        <button type="button" class="admin-secondary-button" @onclick="LoadAsync">Actualizar</button>
+    </div>
+
+    @if(IsLoading) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando agrupacion por rol...</span>
+            </div>
+        </div>
+    } else {
+        <div class="admin-stacked-grid">
+            @foreach(var role in Roles) {
+                <section class="admin-card">
+                    <div class="admin-role-header">
+                        <div>
+                            <h2>@role.RoleName</h2>
+                            <p>@(role.Users.Count == 0 ? "Sin usuarios asignados." : $"{role.Users.Count} usuario(s) asignado(s).")</p>
+                        </div>
+                        <span class="admin-badge">@(role.Permissions.Count == 0 ? "Sin claims de rol" : string.Join(", ", role.Permissions))</span>
+                    </div>
+
+                    @if(role.Users.Count == 0) {
+                        <p class="admin-empty">Este rol aun no tiene usuarios enlazados.</p>
+                    } else {
+                        <div class="admin-table-shell">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Correo</th>
+                                        <th>Perfil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var user in role.Users) {
+                                        <tr>
+                                            <td>@user.FullName</td>
+                                            <td>@user.Email</td>
+                                            <td>@user.ProfileName</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </section>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    bool IsLoading = true;
+    IReadOnlyList<GestionRoleUsersItem> Roles = [];
+
+    protected override async Task OnInitializedAsync() {
+        await LoadAsync();
+    }
+
+    async Task LoadAsync() {
+        IsLoading = true;
+        Roles = await GestionManagerService.GetUsersByRoleAsync();
+        IsLoading = false;
+    }
+}

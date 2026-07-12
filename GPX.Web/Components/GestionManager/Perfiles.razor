@@ -1,0 +1,126 @@
+@page "/gestion/perfiles"
+@attribute [Authorize(Policy = "Module:ADMIN_PROFILES")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Perfiles</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Perfiles</h1>
+            <p>Catalogo funcional que conecta usuarios con modulos visibles.</p>
+        </div>
+        <button type="button" class="admin-secondary-button" @onclick="PrepareNewProfileAsync">Nuevo perfil</button>
+    </div>
+
+    @if(!string.IsNullOrWhiteSpace(StatusMessage)) {
+        <div class="@StatusCssClass">@StatusMessage</div>
+    }
+
+    @if(IsLoading) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando perfiles...</span>
+            </div>
+        </div>
+    } else {
+        <div class="admin-grid">
+            <section class="admin-card">
+                <h2>Listado</h2>
+                <div class="admin-table-shell">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Perfil</th>
+                                <th>Descripcion</th>
+                                <th>Usuarios</th>
+                                <th>Modulos</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var profile in Profiles) {
+                                <tr>
+                                    <td>@profile.Name</td>
+                                    <td>@profile.Description</td>
+                                    <td>@profile.UserCount</td>
+                                    <td>@(profile.Modules.Count == 0 ? "Sin modulos" : string.Join(", ", profile.Modules))</td>
+                                    <td>
+                                        <button type="button" class="admin-link-button" @onclick="@(() => EditProfileAsync(profile.Id))">Editar</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <h2>@(ProfileEditor.Id is null ? "Alta de perfil" : "Modificar perfil")</h2>
+
+                <EditForm Model="@ProfileEditor" OnValidSubmit="SaveProfileAsync" FormName="gestion-perfiles-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <label class="admin-field">
+                        <span>Nombre del perfil</span>
+                        <InputText @bind-Value="ProfileEditor.Name" />
+                    </label>
+
+                    <label class="admin-field">
+                        <span>Descripcion</span>
+                        <InputTextArea @bind-Value="ProfileEditor.Description" />
+                    </label>
+
+                    <div class="admin-actions">
+                        <button type="submit" class="admin-primary-button">Guardar</button>
+                        <button type="button" class="admin-secondary-button" @onclick="PrepareNewProfileAsync">Limpiar</button>
+                    </div>
+                </EditForm>
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    bool IsLoading = true;
+    string StatusMessage = string.Empty;
+    string StatusCssClass = "admin-status";
+    IReadOnlyList<GestionProfileListItem> Profiles = [];
+    GestionProfileEditor ProfileEditor = new();
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadAsync();
+    }
+
+    async Task ReloadAsync() {
+        IsLoading = true;
+        Profiles = await GestionManagerService.GetProfilesAsync();
+        ProfileEditor = await GestionManagerService.BuildProfileEditorAsync();
+        IsLoading = false;
+    }
+
+    async Task PrepareNewProfileAsync() {
+        ProfileEditor = await GestionManagerService.BuildProfileEditorAsync();
+        StatusMessage = string.Empty;
+    }
+
+    async Task EditProfileAsync(int profileId) {
+        ProfileEditor = await GestionManagerService.BuildProfileEditorAsync(profileId);
+        StatusMessage = string.Empty;
+    }
+
+    async Task SaveProfileAsync() {
+        var result = await GestionManagerService.SaveProfileAsync(ProfileEditor);
+        StatusMessage = result.Succeeded
+            ? result.Message
+            : $"{result.Message} {string.Join(" ", result.Errors)}".Trim();
+        StatusCssClass = result.Succeeded ? "admin-status success" : "admin-status error";
+
+        if(result.Succeeded) {
+            await ReloadAsync();
+        }
+    }
+}

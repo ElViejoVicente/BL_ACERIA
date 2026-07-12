@@ -1,0 +1,47 @@
+﻿@page "/Account/AccessDenied"
+
+@inject NavigationManager NavigationManager
+
+<PageTitle>Acceso denegado</PageTitle>
+
+<div class="access-denied-page">
+    <div class="access-denied-card">
+        <div class="access-denied-icon">
+            <span>🔒</span>
+        </div>
+
+        <div class="access-denied-content">
+            <p class="access-denied-badge">Seguridad</p>
+            <h1>Acceso denegado</h1>
+            <p class="access-denied-message">
+                No cuentas con permisos para acceder a este recurso.
+            </p>
+            <p class="access-denied-detail">
+                Tu perfil no tiene autorización para entrar a esta sección del sistema.
+                Si consideras que esto es un error, comunícate con el administrador.
+            </p>
+
+          @*   <div class="access-denied-actions">
+                <button type="button" class="btn-primary-custom" @onclick="IrAlInicio">
+                    Ir al inicio
+                </button>
+
+                <button type="button" class="btn-secondary-custom" @onclick="IrAModuloSeguro">
+                    Volver
+                </button>
+            </div> *@
+        </div>
+    </div>
+</div>
+
+@code {
+    void IrAlInicio()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    void IrAModuloSeguro()
+    {
+        NavigationManager.NavigateTo("/inicio");
+    }
+}

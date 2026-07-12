@@ -1,0 +1,55 @@
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ModuleAccessService ModuleAccessService
+
+@if(authenticationState is not null) {
+    var user = authenticationState.User;
+    var roles = user.FindAll(ClaimTypes.Role).Select(claim => claim.Value).ToArray();
+    var modules = user.FindAll(AppClaimTypes.Module).Select(claim => claim.Value).ToArray();
+    var permissions = user.FindAll(AppClaimTypes.Permission).Select(claim => claim.Value).ToArray();
+
+    <DxStackLayout Orientation="Orientation.Vertical" CssClass="module-summary" ItemSpacing="0.5rem">
+        <Items>
+            <DxStackLayoutItem>
+                <Template>
+                    <span><strong>Usuario:</strong> @ModuleAccessService.GetDisplayName(user)</span>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem>
+                <Template>
+                    <span><strong>Perfil:</strong> @ModuleAccessService.GetProfileName(user)</span>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem>
+                <Template>
+                    <span><strong>Rol:</strong> @(roles.Length > 0 ? string.Join(", ", roles) : "Sin rol")</span>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem>
+                <Template>
+                    <span><strong>Modulos del perfil:</strong> @(modules.Length > 0 ? string.Join(", ", modules) : "Sin modulos")</span>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem>
+                <Template>
+                    <span><strong>Claims de permiso:</strong> @(permissions.Length > 0 ? string.Join(", ", permissions) : "Sin claims de permiso")</span>
+                </Template>
+            </DxStackLayoutItem>
+            <DxStackLayoutItem>
+                <Template>
+                    <span><strong>Permiso actual:</strong> @ModuleCode</span>
+                </Template>
+            </DxStackLayoutItem>
+        </Items>
+    </DxStackLayout>
+}
+
+@code {
+    private AuthenticationState? authenticationState;
+
+    [Parameter] public string ModuleCode { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync() {
+        authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    }
+}

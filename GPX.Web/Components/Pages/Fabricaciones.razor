@@ -1,0 +1,23 @@
+@page "/modulos/fabricaciones"
+@attribute [Authorize(Policy = "Module:MANUFACTURING")]
+
+<PageTitle>Fabricaciones</PageTitle>
+
+<div class="block-content card">
+    <div class="title">
+        <div class="title-text">Fabricaciones</div>
+    </div>
+    <p>Este modulo entra por <strong>AppProfileModules</strong>. Ademas, el boton siguiente se habilita solo por un claim de usuario guardado en <strong>AspNetUserClaims</strong>.</p>
+
+    <ModuleAccessSummary ModuleCode="MANUFACTURING" />
+
+    <AuthorizeView Policy="@AppPolicies.Permission(AppPolicies.ManufacturingReleasePermission)">
+        <Authorized>
+            <DxButton Text="Liberar orden de fabricacion" RenderStyle="ButtonRenderStyle.Primary" CssClass="mt-3" />
+            <p class="claim-note">Visible para <strong>vhernandez@clgrupoindustrial.com</strong> porque tiene el claim <code>app:permission = manufacturing:release</code>.</p>
+        </Authorized>
+        <NotAuthorized>
+            <p class="claim-note">Tu usuario puede entrar al modulo, pero no tiene el claim individual para liberar ordenes.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>

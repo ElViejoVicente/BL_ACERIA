@@ -1,0 +1,63 @@
+.home-page {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.hero {
+    display: grid;
+    gap: 1rem;
+    padding: 1.75rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--dxbl-btn-primary-bg) 16%, transparent), transparent 70%);
+    border: 1px solid var(--dxbl-border-color);
+}
+
+.eyebrow {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dxbl-btn-primary-bg);
+}
+
+.hero h1 {
+    margin: 0 0 0.75rem;
+}
+
+.hero p {
+    margin: 0;
+    max-width: 52rem;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid var(--dxbl-border-color);
+    background-color: var(--dxbl-card-bg, var(--dxbl-bg));
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.card p {
+    margin: 0;
+    line-height: 1.5;
+}

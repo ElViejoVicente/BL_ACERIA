@@ -1,0 +1,216 @@
+.main-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.login-shell {
+    --login-overlay-opacity: 0.58;
+    --login-background-image: none;
+    position: relative;
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--dxds-color-surface-neutral-default-rest) calc(var(--login-overlay-opacity) * 100%), transparent) 0%,
+            color-mix(in srgb, var(--dxds-color-surface-neutral-default-rest) calc((var(--login-overlay-opacity) + 0.08) * 100%), transparent) 100%
+        ),
+        radial-gradient(circle at top left, color-mix(in srgb, var(--dxbl-primary) 12%, white) 0%, transparent 32%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--dxbl-primary) 10%, white) 0%, transparent 36%),
+        var(--login-background-image),
+        linear-gradient(180deg, color-mix(in srgb, var(--dxds-color-surface-neutral-default-rest) 94%, white) 0%, var(--dxds-color-surface-neutral-default-rest) 100%);
+    background-size: cover, auto, auto, cover, auto;
+    background-position: center, top left, bottom right, center, center;
+}
+
+.block-content {
+    border-radius: 1.1rem;
+    flex-grow: 0;
+    margin: auto;
+    max-width: 34rem;
+    padding: 2rem 1.8rem 1.6rem;
+    width: min(100%, 34rem);
+}
+
+.login-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--dxds-color-border-neutral-default-rest) 80%, transparent);
+    box-shadow: 0 1.4rem 3.4rem #09203a14;
+    animation: reveal-login 650ms ease-out;
+}
+
+.login-company-mark {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.65rem;
+    animation: logo-rise 700ms ease-out;
+}
+
+.login-company-mark img {
+    width: auto;
+    max-width: min(18rem, 72vw);
+    max-height: 5.4rem;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 24px #08294916);
+}
+
+.login-company-caption {
+    text-align: center;
+    margin-bottom: 1.3rem;
+    color: color-mix(in srgb, var(--dxds-color-content-neutral-secondary-rest) 94%, var(--dxds-color-content-neutral-default-rest));
+    font-size: var(--dxds-font-size-headline-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.login-halo {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--dxbl-primary) 14%, transparent);
+    filter: blur(8px);
+}
+
+.login-halo-top {
+    width: 8rem;
+    height: 8rem;
+    top: -2.6rem;
+    left: -2.2rem;
+}
+
+.login-halo-bottom {
+    width: 10rem;
+    height: 10rem;
+    right: -3rem;
+    bottom: -4rem;
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 0.625rem;
+}
+
+.login-title {
+    gap: 0.35rem;
+}
+
+.eyebrow {
+    display: block;
+    color: var(--dxds-color-content-neutral-default-rest);
+    font-family: var(--dxds-font-family-sans-serif);
+    font-size: var(--dxds-font-size-headline-sm);
+    font-weight: var(--dxds-font-weight-headline-default);
+    line-height: var(--dxds-line-height-headline-md);
+    letter-spacing: var(--dxds-letter-spacing-headline-md);
+    text-transform: none;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+
+.title-caption {
+    max-width: 24rem;
+    text-align: center;
+    color: color-mix(in srgb, var(--dxds-color-content-neutral-secondary-rest) 92%, #1b3550);
+    font-size: 0.94rem;
+    line-height: 1.45;
+}
+
+.or {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.9rem 0;
+}
+
+.or .or-line {
+    border-bottom: 1px solid var(--dxds-color-content-neutral-default-rest);
+    width: 100%;
+    opacity: 0.15;
+}
+
+.or .or-text {
+    padding: 0 0.625rem;
+    font-size: 0.78rem;
+    line-height: 1.125rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.links-container {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+    align-items: center;
+    padding: 0.85rem 0 0.15rem;
+}
+
+::deep a {
+    color: var(--dxds-color-content-primary-default-rest);
+    text-decoration: underline;
+}
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-wrap: break-word;
+    background-color: color-mix(in srgb, var(--dxds-color-surface-neutral-default-rest) 96%, white);
+    background-clip: border-box;
+}
+
+::deep .w-100 {
+    width: 100%;
+}
+
+::deep .text-danger {
+    color: var(--dxds-color-surface-danger-default-rest);
+}
+
+@keyframes reveal-login {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes logo-rise {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 720px) {
+    .login-shell {
+        padding-top: 2rem;
+    }
+
+    .block-content {
+        padding: 1.6rem 1.1rem 1.3rem;
+    }
+
+    .login-company-mark img {
+        max-width: min(15rem, 76vw);
+        max-height: 4.4rem;
+    }
+}

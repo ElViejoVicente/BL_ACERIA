@@ -1,0 +1,80 @@
+﻿
+@using GPX.Negocio.Aceria
+@using GPX.Negocio.ORM
+@using DevExpress.Blazor
+
+<section class="tundish-card @(Tundish?.TundishActivo == false ? "is-disabled" : "")">
+    <div class="tundish-head">
+        <div class="field field-standard">
+            <span>Tundish @Numero</span>
+            <DxComboBox Data="@ListaTundisStandar"
+                        Value="@SelectedStandard"
+                        ValueChanged="@((int? value) => OnStandardChanged(value))"
+                        ValueFieldName="@nameof(ListTundishStandard.tsId)"
+                        TextFieldName="@nameof(ListTundishStandard.tsNombreCompleto)"
+                        NullText="Seleccione..."
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                        CssClass="tundish-standard-combo"
+                        Width="50%" />
+        </div>
+
+        <div class="metric">
+            <span>Vida</span>
+            <strong>@VidaUtilTundish</strong>
+        </div>
+        <div class="metric @(Tundish?.TundishActivo == false ? "metric-alert" : "")">
+            <span>Col.</span>
+            <strong>@FormatNumber(Tundish?.NumColadas)</strong>
+        </div>
+        <div class="metric">
+            <span>Min/col</span>
+            <strong>@FormatNumber(Tundish?.MinutosXColada)</strong>
+        </div>
+
+        <div class="switch-field" title="Activo">
+            <DxCheckBox Checked="@(Tundish?.TundishActivo ?? true)"
+                        CheckedChanged="@((bool value) => OnActivoChanged(value))"
+                        ValidationEnabled="false" />
+            <span>Activo</span>
+        </div>
+    </div>
+
+    <div class="tundish-body">
+        <div class="bocas-grid">
+            @for (var i = 1; i <= 6; i++)
+            {
+                var bocaNumero = i;
+                var boca = GetBoca(bocaNumero);
+
+                <div class="boca" @key="bocaNumero">
+                    <div class="boca-tipo @GetTipoClass(boca.Tipo)"
+                         style="background-color:@GetEstadoColor(boca.Estado)">
+                        @boca.Tipo
+                    </div>
+
+                    <DxComboBox Data="@EstadosBoca"
+                                Value="@boca.Estado"
+                                ValueChanged="@((string value) => OnEstadoBocaChanged(bocaNumero, value))"
+                                ValueFieldName="@nameof(BocaEstadoOption.Value)"
+                                TextFieldName="@nameof(BocaEstadoOption.Text)"
+                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Never"
+                                ValidationEnabled="false"
+                                CssClass="boca-estado-combo"
+                                Width="100%" />
+                </div>
+            }
+        </div>
+
+        <div class="rendimiento-grid">
+            <div class="rend-head bb1">BB1</div>
+            <div class="rend-head bb2">BB2</div>
+            <div class="rend-head bb3">BB3</div>
+            <div>@FormatNumber(Tundish?.TnXColadaBB1)</div>
+            <div>@FormatNumber(Tundish?.TnXColadaBB2)</div>
+            <div>@FormatNumber(Tundish?.TnXColadaBB3)</div>
+            <div class="total">@FormatNumber((Tundish?.NumColadas ?? 0) * (Tundish?.TnXColadaBB1 ?? 0))</div>
+            <div class="total">@FormatNumber((Tundish?.NumColadas ?? 0) * (Tundish?.TnXColadaBB2 ?? 0))</div>
+            <div class="total">@FormatNumber((Tundish?.NumColadas ?? 0) * (Tundish?.TnXColadaBB3 ?? 0))</div>
+        </div>
+    </div>
+</section>

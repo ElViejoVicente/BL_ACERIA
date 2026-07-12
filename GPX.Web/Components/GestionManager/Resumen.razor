@@ -1,0 +1,82 @@
+@page "/gestion"
+@attribute [Authorize(Policy = "Module:ADMIN_OVERVIEW")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Gestion</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Gestion general</h1>
+            <p>Centro operativo para administrar usuarios, roles, perfiles, modulos y claims del proyecto base.</p>
+        </div>
+    </div>
+
+    @if(Summary is null) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando resumen...</span>
+            </div>
+        </div>
+    } else {
+        <div class="cards">
+            <div class="card">
+                <h2>Usuarios</h2>
+                <p>@Summary.UsersCount usuarios registrados.</p>
+            </div>
+            <div class="card">
+                <h2>Roles</h2>
+                <p>@Summary.RolesCount roles configurados.</p>
+            </div>
+            <div class="card">
+                <h2>Perfiles</h2>
+                <p>@Summary.ProfilesCount perfiles funcionales.</p>
+            </div>
+            <div class="card">
+                <h2>Modulos</h2>
+                <p>@Summary.ModulesCount modulos habilitados en menu.</p>
+            </div>
+            <div class="card">
+                <h2>Claims por rol</h2>
+                <p>@Summary.RoleClaimsCount claims de permiso heredados desde roles.</p>
+            </div>
+            <div class="card">
+                <h2>Claims por usuario</h2>
+                <p>@Summary.UserClaimsCount claims de permiso directos.</p>
+            </div>
+        </div>
+
+        <div class="admin-quick-links">
+            <a class="admin-link-card" href="/gestion/usuarios">
+                <strong>Usuarios</strong>
+                <span>Alta, modificacion, perfil, roles y claims por usuario.</span>
+            </a>
+            <a class="admin-link-card" href="/gestion/usuarios-por-rol">
+                <strong>Usuarios por rol</strong>
+                <span>Vista agrupada para revisar que usuarios estan colgados de cada rol.</span>
+            </a>
+            <a class="admin-link-card" href="/gestion/roles">
+                <strong>Roles</strong>
+                <span>Gestion de roles y permisos via <code>AspNetRoleClaims</code>.</span>
+            </a>
+            <a class="admin-link-card" href="/gestion/perfiles">
+                <strong>Perfiles</strong>
+                <span>Catalogo funcional de perfiles enlazados a usuarios.</span>
+            </a>
+            <a class="admin-link-card" href="/gestion/perfiles-modulos">
+                <strong>Perfiles por modulo</strong>
+                <span>Mapa real que construye el menu dinamico desde <code>AppProfileModules</code>.</span>
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    GestionDashboardSummary? Summary;
+
+    protected override async Task OnInitializedAsync() {
+        Summary = await GestionManagerService.GetDashboardSummaryAsync();
+    }
+}

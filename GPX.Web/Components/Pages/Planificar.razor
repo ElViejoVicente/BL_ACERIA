@@ -1,0 +1,23 @@
+@page "/modulos/planificar"
+@attribute [Authorize(Policy = "Module:PLANNING")]
+
+<PageTitle>Planificar</PageTitle>
+
+<div class="block-content card">
+    <div class="title">
+        <div class="title-text">Planificar</div>
+    </div>
+    <p>Este ejemplo combina modulo por perfil y una accion avanzada por rol. El boton depende de un claim almacenado en <strong>AspNetRoleClaims</strong> para el rol <strong>Admin</strong>.</p>
+
+    <ModuleAccessSummary ModuleCode="PLANNING" />
+
+    <AuthorizeView Policy="@AppPolicies.Permission(AppPolicies.PlanningApprovalPermission)">
+        <Authorized>
+            <DxButton Text="Publicar plan maestro" RenderStyle="ButtonRenderStyle.Primary" CssClass="mt-3" />
+            <p class="claim-note">Visible para cualquier usuario con rol <strong>Admin</strong> que herede el claim <code>app:permission = planning:approve</code>.</p>
+        </Authorized>
+        <NotAuthorized>
+            <p class="claim-note">Tu rol puede entrar al modulo, pero no tiene el claim de aprobacion asociado.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>

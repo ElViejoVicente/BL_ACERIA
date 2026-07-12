@@ -1,0 +1,104 @@
+@page "/gestion/claims"
+@attribute [Authorize(Policy = "Module:ADMIN_CLAIMS")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Claims</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Claims</h1>
+            <p>Vista dedicada para administrar y auditar permisos directos de usuario y permisos heredados por rol.</p>
+        </div>
+        <button type="button" class="admin-secondary-button" @onclick="LoadAsync">Actualizar</button>
+    </div>
+
+    <div class="admin-status">
+        Los claims se editan desde <a href="/gestion/usuarios">Usuarios</a> y <a href="/gestion/roles">Roles</a>. Esta pantalla los concentra para revision y trazabilidad operativa.
+    </div>
+
+    @if(IsLoading) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando claims...</span>
+            </div>
+        </div>
+    } else if(Summary is not null) {
+        <div class="admin-grid">
+            <section class="admin-card">
+                <h2>Claims por usuario</h2>
+                <div class="admin-table-shell">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Correo</th>
+                                <th>Perfil</th>
+                                <th>Roles</th>
+                                <th>Claims directos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var user in Summary.Users) {
+                                <tr>
+                                    <td>@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.ProfileName</td>
+                                    <td>@(user.Roles.Count == 0 ? "Sin roles" : string.Join(", ", user.Roles))</td>
+                                    <td>@(user.Permissions.Count == 0 ? "Sin claims" : string.Join(", ", user.Permissions))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <h2>Claims por rol</h2>
+                <div class="admin-table-shell">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Rol</th>
+                                <th>Usuarios</th>
+                                <th>Claims heredados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var role in Summary.Roles) {
+                                <tr>
+                                    <td>@role.RoleName</td>
+                                    <td>@role.UserCount</td>
+                                    <td>@(role.Permissions.Count == 0 ? "Sin claims" : string.Join(", ", role.Permissions))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="admin-subsection">
+                    <h3>Uso esperado</h3>
+                    <p><strong>AspNetUserClaims</strong>: permisos excepcionales o quirurgicos para un usuario puntual.</p>
+                    <p><strong>AspNetRoleClaims</strong>: permisos heredables que deben compartirse por todos los usuarios del rol.</p>
+                </div>
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    bool IsLoading = true;
+    GestionClaimsSummary? Summary;
+
+    protected override async Task OnInitializedAsync() {
+        await LoadAsync();
+    }
+
+    async Task LoadAsync() {
+        IsLoading = true;
+        Summary = await GestionManagerService.GetClaimsSummaryAsync();
+        IsLoading = false;
+    }
+}

@@ -1,0 +1,30 @@
+@page "/"
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Inicio</PageTitle>
+
+@if(isAuthenticated) {
+    @* <div class="block-content card">
+        <div class="title">
+            <div class="title-text">Proyecto Base</div>
+        </div>
+        <p>Base lista para integrar funcionalidad real.</p>
+    </div> *@
+}
+
+@code {
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync() {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authenticationState.User.Identity?.IsAuthenticated == true;
+    }
+
+    protected override void OnAfterRender(bool firstRender) {
+        if(firstRender && !isAuthenticated) {
+            NavigationManager.NavigateTo("/Account/Login", true);
+        }
+    }
+}

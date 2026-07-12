@@ -1,0 +1,11 @@
+@inject NavigationManager NavigationManager
+
+@code {
+    [Parameter] public string Page { get; set; } = "/";
+
+    protected override void OnAfterRender(bool firstRender) {
+        if(firstRender) {
+            NavigationManager.NavigateTo(Page, true);
+        }
+    }
+}

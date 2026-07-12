@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="GPX.Web\GPX.Web.csproj" />
+  <Project Path="GPX.Negocio\GPX.Negocio.csproj" />
+</Solution>

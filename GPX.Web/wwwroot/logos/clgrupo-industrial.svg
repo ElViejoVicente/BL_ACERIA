@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 190" role="img" aria-labelledby="title desc">
+  <title id="title">CL Grupo Industrial</title>
+  <desc id="desc">Logo corporativo de CL Grupo Industrial.</desc>
+  <defs>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d9f0ff"/>
+      <stop offset="45%" stop-color="#6eaed3"/>
+      <stop offset="100%" stop-color="#123860"/>
+    </linearGradient>
+  </defs>
+  <rect width="680" height="190" fill="none"/>
+  <g transform="translate(18 8)">
+    <circle cx="86" cy="86" r="73" fill="none" stroke="url(#ring)" stroke-width="18"/>
+    <path d="M116 38c-10-8-22-12-35-12-33 0-60 27-60 60s27 60 60 60c14 0 27-5 37-13v-24c-9 10-22 17-37 17-22 0-40-18-40-40s18-40 40-40c14 0 26 7 34 17h26c-5-10-13-19-25-25z" fill="#062447"/>
+    <rect x="73" y="35" width="16" height="104" rx="8" fill="#062447"/>
+  </g>
+  <g transform="translate(190 28)" fill="#062447">
+    <text x="0" y="55" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="700" letter-spacing="1">GRUPO</text>
+    <text x="2" y="112" font-family="Segoe UI, Arial, sans-serif" font-size="54" font-weight="700" letter-spacing="1">INDUSTRIAL</text>
+    <text x="4" y="160" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="400" opacity="0.9">Industria con alma</text>
+  </g>
+</svg>

@@ -1,0 +1,125 @@
+@page "/gestion/roles"
+@attribute [Authorize(Policy = "Module:ADMIN_ROLES")]
+
+@inject GestionManagerService GestionManagerService
+
+<PageTitle>Roles</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>Roles</h1>
+            <p>Gestiona los roles de Identity y sus claims de permiso para herencia transversal.</p>
+        </div>
+        <button type="button" class="admin-secondary-button" @onclick="PrepareNewRoleAsync">Nuevo rol</button>
+    </div>
+
+    @if(!string.IsNullOrWhiteSpace(StatusMessage)) {
+        <div class="@StatusCssClass">@StatusMessage</div>
+    }
+
+    @if(IsLoading) {
+        <div class="loading-panel">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Cargando roles...</span>
+            </div>
+        </div>
+    } else {
+        <div class="admin-grid">
+            <section class="admin-card">
+                <h2>Listado</h2>
+                <div class="admin-table-shell">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Rol</th>
+                                <th>Usuarios</th>
+                                <th>Claims</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var role in RoleItems) {
+                                <tr>
+                                    <td>@role.Name</td>
+                                    <td>@role.UserCount</td>
+                                    <td>@(role.Permissions.Count == 0 ? "Sin claims" : string.Join(", ", role.Permissions))</td>
+                                    <td>
+                                        <button type="button" class="admin-link-button" @onclick="@(() => EditRoleAsync(role.Id))">Editar</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <h2>@(string.IsNullOrWhiteSpace(RoleEditor.Id) ? "Alta de rol" : "Modificar rol")</h2>
+
+                <EditForm Model="@RoleEditor" OnValidSubmit="SaveRoleAsync" FormName="gestion-roles-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <label class="admin-field">
+                        <span>Nombre del rol</span>
+                        <InputText @bind-Value="RoleEditor.Name" />
+                    </label>
+
+                    <label class="admin-field">
+                        <span>Claims del rol</span>
+                        <InputTextArea @bind-Value="RoleEditor.PermissionsText" />
+                        <small>Uno por linea. Ejemplo: <code>planning:approve</code></small>
+                    </label>
+
+                    <div class="admin-actions">
+                        <button type="submit" class="admin-primary-button">Guardar</button>
+                        <button type="button" class="admin-secondary-button" @onclick="PrepareNewRoleAsync">Limpiar</button>
+                    </div>
+                </EditForm>
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    bool IsLoading = true;
+    string StatusMessage = string.Empty;
+    string StatusCssClass = "admin-status";
+    IReadOnlyList<GestionRoleListItem> RoleItems = [];
+    GestionRoleEditor RoleEditor = new();
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadAsync();
+    }
+
+    async Task ReloadAsync() {
+        IsLoading = true;
+        RoleItems = await GestionManagerService.GetRolesAsync();
+        RoleEditor = await GestionManagerService.BuildRoleEditorAsync();
+        IsLoading = false;
+    }
+
+    async Task PrepareNewRoleAsync() {
+        RoleEditor = await GestionManagerService.BuildRoleEditorAsync();
+        StatusMessage = string.Empty;
+    }
+
+    async Task EditRoleAsync(string roleId) {
+        RoleEditor = await GestionManagerService.BuildRoleEditorAsync(roleId);
+        StatusMessage = string.Empty;
+    }
+
+    async Task SaveRoleAsync() {
+        var result = await GestionManagerService.SaveRoleAsync(RoleEditor);
+        StatusMessage = result.Succeeded
+            ? result.Message
+            : $"{result.Message} {string.Join(" ", result.Errors)}".Trim();
+        StatusCssClass = result.Succeeded ? "admin-status success" : "admin-status error";
+
+        if(result.Succeeded) {
+            await ReloadAsync();
+        }
+    }
+}

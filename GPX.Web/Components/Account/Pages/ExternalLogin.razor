@@ -1,0 +1,139 @@
+@page "/Account/ExternalLogin"
+
+@using System.Security.Claims
+@using GPX.Web.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+
+@inject ApplicationDbContext DbContext
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject ILogger<ExternalLogin> Logger
+
+<PageTitle>Microsoft 365</PageTitle>
+
+<div class="main-content">
+    <div class="block-content card">
+        <StatusMessage Message="@message" />
+        <div class="title">
+            <div class="title-header-text">Microsoft 365</div>
+            <div class="title-content-text">Validando acceso con tu cuenta corporativa.</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public const string LoginCallbackAction = "LoginCallback";
+
+    private string? message;
+    private ExternalLoginInfo externalLoginInfo = default!;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? RemoteError { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Action { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        if(RemoteError is not null) {
+            RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
+        }
+
+        var info = await SignInManager.GetExternalLoginInfoAsync();
+        if(info is null) {
+            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+        }
+
+        externalLoginInfo = info;
+
+        if(HttpMethods.IsGet(HttpContext.Request.Method) && Action == LoginCallbackAction) {
+            await OnLoginCallbackAsync();
+            return;
+        }
+
+        RedirectManager.RedirectTo("Account/Login");
+    }
+
+    private async Task OnLoginCallbackAsync() {
+        var result = await SignInManager.ExternalLoginSignInAsync(
+            externalLoginInfo.LoginProvider,
+            externalLoginInfo.ProviderKey,
+            isPersistent: false,
+            bypassTwoFactor: true);
+
+        if(result.Succeeded) {
+            Logger.LogInformation(
+                "{Name} logged in with {LoginProvider} provider.",
+                externalLoginInfo.Principal.Identity?.Name,
+                externalLoginInfo.LoginProvider);
+            RedirectManager.RedirectTo(ReturnUrl);
+            return;
+        }
+
+        if(result.IsLockedOut) {
+            RedirectManager.RedirectTo("Account/Lockout");
+            return;
+        }
+
+        var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email)
+            ?? externalLoginInfo.Principal.FindFirstValue("email")
+            ?? externalLoginInfo.Principal.FindFirstValue("preferred_username");
+
+        if(string.IsNullOrWhiteSpace(email)) {
+            RedirectManager.RedirectToWithStatus("Account/Login", "Microsoft 365 no devolvio un correo valido.", HttpContext);
+            return;
+        }
+
+        var user = await UserManager.FindByEmailAsync(email);
+        if(user == null) {
+            user = await CreateInvitadoUserAsync(email);
+        }
+
+        var logins = await UserManager.GetLoginsAsync(user);
+        if(logins.All(login => login.LoginProvider != externalLoginInfo.LoginProvider || login.ProviderKey != externalLoginInfo.ProviderKey)) {
+            var addLoginResult = await UserManager.AddLoginAsync(user, externalLoginInfo);
+            if(!addLoginResult.Succeeded) {
+                message = $"Error: {string.Join(", ", addLoginResult.Errors.Select(error => error.Description))}";
+                return;
+            }
+        }
+
+        await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+        Logger.LogInformation("User {Email} signed in with Microsoft 365.", email);
+        RedirectManager.RedirectTo(ReturnUrl);
+    }
+
+    private async Task<ApplicationUser> CreateInvitadoUserAsync(string email) {
+        var invitadoProfile = await DbContext.Profiles.FirstAsync(profile => profile.Name == "Invitado");
+        var fullName = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name)
+            ?? externalLoginInfo.Principal.FindFirstValue("name")
+            ?? email;
+
+        var user = new ApplicationUser {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            FullName = fullName,
+            ProfileId = invitadoProfile.Id
+        };
+
+        var createResult = await UserManager.CreateAsync(user);
+        if(!createResult.Succeeded) {
+            throw new InvalidOperationException($"No fue posible crear el usuario SSO '{email}': {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
+        }
+
+        if(!await UserManager.IsInRoleAsync(user, "Invitado")) {
+            await UserManager.AddToRoleAsync(user, "Invitado");
+        }
+
+        return user;
+    }
+}

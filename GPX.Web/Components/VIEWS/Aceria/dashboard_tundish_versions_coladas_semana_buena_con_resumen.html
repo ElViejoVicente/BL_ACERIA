@@ -1,0 +1,1605 @@
+
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Planificación de Cortes - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .group-panel, .panel {
+            background: #fff;
+            /*border-radius: 8px;
+            margin-bottom: 15px;*/
+            padding: 3px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .group-header {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 0;
+            background: #72add9;
+            color: #fff;
+            /*border-radius: 5px;*/
+        }
+
+        .panel-header {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 0;
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .group-content, .panel-content {
+            display: none;
+            padding: 2px 0 0 10px;
+        }
+
+        .coladas-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .colada-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .S275H {
+            background-color: #cce5ff;
+        }
+
+        .S275TI {
+            background-color: #f6ff29;
+        }
+
+        .S355V {
+            background-color: #236704;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        th {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        h2, h3 {
+            color: #333;
+        }
+
+        .dx-grid {
+            font-family: Arial, sans-serif;
+            border: 1px solid #ccc;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+            .dx-grid th {
+                background-color: #f4f4f4;
+                color: #333;
+                font-weight: bold;
+                padding: 8px;
+                text-align: center;
+                border-bottom: 2px solid #ccc;
+            }
+
+            .dx-grid td {
+                padding: 8px;
+                text-align: center;
+                border-bottom: 1px solid #eee;
+            }
+
+            .dx-grid tr:nth-child(even) {
+                background-color: #fafafa;
+            }
+
+            .dx-grid tr:hover {
+                background-color: #e6f7ff;
+            }
+
+        .activo {
+            background-color: #d4f8d4 !important;
+        }
+
+        .semaforo {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .verde {
+            background-color: green;
+        }
+
+        .rojo {
+            background-color: red;
+        }
+
+        .Cerrada {
+            background-color: #f3a20f;
+            color: white;
+        }
+
+        .BB1 {
+            background-color: #fff
+        }
+
+        .BB2 {
+            background-color: #fff
+        }
+
+        .BB3 {
+            background-color: #fff
+        }
+
+        .BB1 > td {
+            font-weight: bold;
+            color: #aa7bd4
+        }
+
+        .BB2 > td {
+            font-weight: bold;
+            color: #72add9
+        }
+
+        .BB3 > td {
+            font-weight: bold;
+            color: #4f9609
+        }
+
+        button {
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .panel {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            /*width: 820px;*/
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+            .header select {
+                padding: 2px 6px;
+                font-size: 13px;
+            }
+
+        .config-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .config-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cell {
+            width: 120px;
+            border: 1px solid #aaa;
+            text-align: center;
+            font-size: 13px;
+        }
+
+            .cell .bb {
+                color: #fff;
+                font-weight: bold;
+                padding: 4px 0;
+            }
+
+        .bb1, .bb2 {
+            background: #18a118; /* verde */
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px
+        }
+
+            .header select {
+                padding: 2px 6px;
+                font-size: 13px
+            }
+
+
+        .cell select {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #aaa;
+            padding: 5px 0;
+            font-size: 13px;
+            background: #fff;
+        }
+
+
+
+        .config-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px
+        }
+
+        .config-row {
+            display: flex;
+            gap: 10px
+        }
+
+        .cell {
+            width: 120px;
+            border: 1px solid #aaa;
+            text-align: center;
+            font-size: 13px
+        }
+
+        .bb {
+            font-weight: bold;
+            padding: 4px 0;
+            color: #fff;
+            transition: background .15s ease,color .15s ease
+        }
+            /* Colores por estado */
+            .bb.open {
+                background: #18a118;
+                color: #fff;
+            }
+            /* Abierta = verde */
+            .bb.closed {
+                background: #f1b400;
+                color: #000;
+            }
+        /* Cerrada = amarillo */
+
+        .cell select {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #aaa;
+            padding: 5px 0;
+            font-size: 13px;
+            background: #fff
+        }
+
+        .tundish-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #78add8;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .btn-finalizar {
+            background: #e74c3c;
+            border: none;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .btn-finalizar:hover {
+                background: #c0392b;
+            }
+
+            .btn-finalizar:disabled {
+                background: #888;
+                cursor: not-allowed;
+            }
+
+        .colada-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #cfe6ff; /* azul claro similar */
+            border: 1px solid #b8d7ff;
+            padding: 10px 12px;
+            margin: 6px 0;
+        }
+
+        .colada-info {
+            color: #000;
+            font-size: 13px;
+            line-height: 1.25;
+        }
+
+        .colada-sub {
+            margin-top: 4px;
+            font-size: 12px;
+        }
+
+        .colada-link {
+            color: #0b5ed7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .colada-link:hover {
+                text-decoration: underline;
+            }
+
+        .btn-finalizar-colada {
+            background: #ff9800; /* naranja/ámbar */
+            border: 1px solid #e68900;
+            color: #111;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+            .btn-finalizar-colada:hover {
+                background: #f08c00;
+            }
+
+            .btn-finalizar-colada:disabled {
+                background: #bdbdbd;
+                border-color: #a8a8a8;
+                color: #333;
+                cursor: not-allowed;
+            }
+
+        .coladas-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0
+        }
+
+            .coladas-control input {
+                width: 80px;
+                padding: 4px 6px
+            }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal {
+            background: #fff;
+            width: 420px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
+            padding: 14px;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0 auto;
+            margin-top: 250px;
+        }
+
+        .modalCortes {
+            background: #fff;
+            width: 920px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 10px 30px rgba(0,0,0,.25);
+            padding: 14px;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 8px
+        }
+
+        .modal-body {
+            font-size: 13px;
+            color: #222;
+            margin-bottom: 12px;
+            line-height: 1.35
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px
+        }
+
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px
+        }
+
+        .btn-primary {
+            background: #0d6efd;
+            color: #fff
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #222
+        }
+
+        .btn-primary:hover {
+            background: #0b5ed7
+        }
+
+        .btn-secondary:hover {
+            background: #dde2e6
+        }
+
+        .colada-extra {
+            margin-top: 8px;
+            background: #fff3cd;
+            border: 1px solid #ffe69c;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-config {
+            background: #ff9800;
+            border: 1px solid #e68900;
+            color: #111;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 12px;
+        }
+
+            .btn-config:hover {
+                background: #f08c00
+            }
+
+        
+            .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            }
+
+    
+ 
+
+
+    </style>
+
+
+
+</head>
+<body>
+    <!-- ... tu HTML del dashboard ... -->
+
+
+
+    <h1>🏭 Planificación de Cortes</h1>
+    <h2>Semana 48 (24/11/2025 - 30/11/2025)</h2>
+    <p>Inicio: 24/11/2025 | Fin: 30/11/2025 | Total cortes: 12 | Total Tn. Totales: 1505 </p>
+    <!-- Tundish 1 -->
+    <div style="width:65%; float:left; margin-right: 20px">
+        <div class='group-panel'>
+            <div class='group-header' onclick="togglePanel('tundish1')">
+                🟢 Tundish 1 (Activo) - 3 coladas<strong>Inicio:</strong> 27/11/2025 12:00 | <strong>Fin:</strong> 27/11/2025 14:00 | <strong>Horas totales:</strong> 2h            <button style="float:right; margin-right:10px" class="btn-finalizar" onclick="finalizarTundish(this)">
+                    Finalizar
+                </button>
+            </div>
+
+            <div class='group-content' id='tundish1'>
+
+                <!-- Version A1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('a1')">⚪ Versión A1 (Inactivo) <strong>Fecha:</strong> 27/11/2025 12:30 | <strong> Teóricas:</strong> 130  | <strong>Tn. Cortes:</strong> A1 (127,89 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m) </div>
+                    <div class='panel-content' id='a1'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275H'>
+                                <strong>Colada 1</strong> | Calidad: S275H | BB1=40  | BB2=45
+
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 2</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S355V'>
+                                <strong>Colada 3</strong> | Calidad: S355V | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Version B1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('b1')">🟢 Versión A2 (Activo)  <strong>Fecha:</strong> 27/11/2025 13:00 | <strong>Tn. Totales:</strong> 300  | <strong>Tn. Cortes:</strong> A2 (130 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='b1'>
+
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 1</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 2</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 3</strong> | Calidad: S275TI | BB1=52  | BB2=46
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Tundish 2 -->
+        <div class='group-panel'>
+            <div class='group-header' onclick="togglePanel('tundish2')">
+                🟢 Tundish 2 (Activo) - 3 coladas<strong>Inicio:</strong> 27/11/2025 12:00 | <strong>Fin:</strong> 27/11/2025 14:00 | <strong>Horas totales:</strong> 2h <button style="float:right; margin-right:10px" class="btn-finalizar" onclick="finalizarTundish(this)">
+                    Finalizar
+                </button>
+            </div>
+            <div class='group-content' id='tundish2'>
+
+                <!-- Version A1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('a12')">⚪ Versión B1 (Inactivo) <strong>Fecha:</strong> 27/11/2025 12:30 | <strong> Teóricas:</strong> 130  | <strong>Tn. Cortes:</strong> B1 (127,89 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='a12'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S355V'>
+                                <strong>Colada 1</strong> | Calidad: S355V | BB1=40  | BB2=45
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td></tr>
+                                            <tr><td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 2</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 3</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Version B1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('b12')">🟢 Versión B2 (Activo) <strong>Fecha:</strong> 27/11/2025 13:00 | <strong>Tn. Totales:</strong> 300  | <strong>Tn. Cortes:</strong> B2 (130 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='b12'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 1</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 2</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 3</strong> | Calidad: S275TI | BB1=52  | BB2=46
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Tundish 3 -->
+        <div class='group-panel'>
+            <div class='group-header' onclick="togglePanel('tundish3')">
+                🟢 Tundish 3 (Activo) - 3 coladas <strong>Inicio:</strong> 27/11/2025 12:00 | <strong>Fin:</strong> 27/11/2025 14:00 | <strong>Horas totales:</strong> 2h <button style="float:right; margin-right:10px" class="btn-finalizar" onclick="finalizarTundish(this)">
+                    Finalizar
+                </button>
+            </div>
+            <div class='group-content' id='tundish3'>
+                <!-- Version A1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('c1')">⚪ Versión C1 (Inactivo) <strong>Fecha:</strong> 27/11/2025 12:30 | <strong> Teóricas:</strong> 130  | <strong>Tn. Cortes:</strong> C1 (127,89 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='c1'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275H'>
+                                <strong>Colada 1</strong> | Calidad: S275H | BB1=40  | BB2=45
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td></tr>
+                                            <tr><td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 2</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 3</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Version B1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('c2')">🟢 Versión C2 (Activo) <strong>Fecha:</strong> 27/11/2025 13:00 | <strong>Tn. Totales:</strong> 300  | <strong>Tn. Cortes:</strong> C2 (130 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='c2'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 1</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 2</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 3</strong> | Calidad: S275TI | BB1=52  | BB2=46
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Tundish 1 -->
+        <div class='group-panel'>
+            <div class='group-header' onclick="togglePanel('tundish4')">
+                🟢 Tundish 4 (Activo) - 3 coladas <strong>Inicio:</strong> 27/11/2025 12:00 | <strong>Fin:</strong> 27/11/2025 14:00 | <strong>Horas totales:</strong> 2h <button style="float:right; margin-right:10px" class="btn-finalizar" onclick="finalizarTundish(this)">
+                    Finalizar
+                </button>
+            </div>
+            <div class='group-content' id='tundish4'>
+                <!-- Version A1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('d1')">⚪ Versión D1 (Inactivo) <strong>Fecha:</strong> 27/11/2025 12:30 | <strong> Teóricas:</strong> 130  | <strong>Tn. Cortes:</strong> D1 (127,89 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='d1'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275H'>
+                                <strong>Colada 1</strong> | Calidad: S275H | BB1=40  | BB2=45
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td></tr>
+                                            <tr><td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr><td>BB1 (280x200)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 2</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 3</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Version B1 -->
+                <div class='panel'>
+                    <div class='panel-header' onclick="togglePanel('d2')">🟢 Versión D2 (Activo) <strong>Fecha:</strong> 27/11/2025 13:00 | <strong>Tn. Totales:</strong> 300  | <strong>Tn. Cortes:</strong> D2 (130 ) | <strong>Cortes</strong> BB1: 5 (8 m), BB2: 4 (11.9 m)</div>
+                    <div class='panel-content' id='d2'>
+                        <div class='coladas-grid'>
+                            <!-- 3 coladas -->
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 1</strong> | Calidad: S275TI | BB1=50  | BB2=50
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275H'>
+                                <strong>Colada 2</strong> | Calidad: S275H | BB1=45  | BB2=48
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                            <div class='colada-item S275TI'>
+                                <strong>Colada 3</strong> | Calidad: S275TI | BB1=52  | BB2=46
+                                <button class="btn-finalizar-colada" style="float:right; margin-right:10px" onclick="finalizarColada(this)">Finalizar Colada</button><details>
+                                    <summary>Ver perfiles y barras</summary>
+                                    <table>
+                                        <thead><tr><th>Perfil</th><th>Línea</th><th>Longitud</th><th>Barras</th><th>Tn. Totales</th><th>Producción</th></tr></thead>
+                                        <tbody>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>3</td><td>8000</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="Cerrada"><td>Cerrada</td><td>4</td><td>0</td><td>0</td><td>00,00 </td><td>00,00 </td></tr>
+                                            <tr class="BB2"> <td>BB2 (400x320)</td><td>5</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB2"><td>BB2 (400x320)</td><td>6</td><td>11900</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>1</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB1"><td>BB1 (280x200)</td><td>2</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                            <tr class="BB3"><td>BB3 (610x320)</td><td>3</td><td>10800</td><td>5</td><td>14,00 </td><td>14,00 </td></tr>
+                                        </tbody>
+                                    </table>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="panel">
+        <div class="header">
+            <div>
+                <strong>Tundish 1:</strong>
+                <select>
+                    <option>[BB1 - BB1 - BB1 - BB2 - BB2 - BB2]</option>
+                </select>
+            </div>
+            <div>
+                <strong>Vida Útil:</strong> 8 &nbsp;&nbsp;
+                <strong>min/col.:</strong> 45,30 &nbsp;&nbsp;
+                <strong>Col. T.:</strong> 10<br />
+                <strong>Coladas Reales:</strong>&nbsp;&nbsp;<input id="coladasExtra" type="number" class="input-coladas" value="3" min="0" step="1" />
+            </div>
+        </div>
+
+        <div class="config-title">Configuración</div>
+
+        <div class="config-row">
+            <!-- 1 -->
+            <div class="cell">
+                <div class="bb open" data-title>BB1</div>
+                <select data-state>
+                    <option selected>Abierta</option>
+                    <option>Cerrada</option>
+                </select>
+            </div>
+
+            <!-- 2 -->
+            <div class="cell">
+                <div class="bb open" data-title>BB1</div>
+                <select data-state>
+                    <option selected>Abierta</option>
+                    <option>Cerrada</option>
+                </select>
+            </div>
+
+            <!-- 3 -->
+            <div class="cell">
+                <div class="bb open" data-title>BB1</div>
+                <select data-state>
+                    <option selected>Abierta</option>
+                    <option>Cerrada</option>
+                </select>
+            </div>
+
+            <!-- 4 -->
+            <div class="cell">
+                <div class="bb closed" data-title>BB2</div>
+                <select data-state>
+                    <option>Abierta</option>
+                    <option selected>Cerrada</option>
+                </select>
+            </div>
+
+            <!-- 5 -->
+            <div class="cell">
+                <div class="bb open" data-title>BB2</div>
+                <select data-state>
+                    <option selected>Abierta</option>
+                    <option>Cerrada</option>
+                </select>
+            </div>
+
+            <!-- 6 -->
+            <div class="cell">
+                <div class="bb open" data-title>BB2</div>
+                <select data-state>
+                    <option selected>Abierta</option>
+                    <option>Cerrada</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function applyState(selectEl) {
+            const cell = selectEl.closest('.cell');
+            const title = cell.querySelector('[data-title]');
+            const val = selectEl.value.trim().toLowerCase();
+
+            // Limpia clases previas
+            title.classList.remove('open', 'closed');
+
+            // Aplica según estado
+            if (val === 'abierta') {
+                title.classList.add('open');     // verde
+            } else {
+                title.classList.add('closed');   // amarillo
+            }
+        }
+
+        // Inicializa y escucha cambios
+        document.querySelectorAll('select[data-state]').forEach(sel => {
+            applyState(sel);                   // pinta al cargar
+            sel.addEventListener('change', () => applyState(sel));
+        });
+    </script>
+
+
+    <div class='agrupacion-semana' style="width:33%; float:left; padding:0">
+        <table>
+            <tr><th>Corte</th><th>Calidad</th><th>Barras totales planificadas</th><th>Barras asignadas (versiones activas)</th><th>Total Barras producidas</th><th>Saturación Almacén Medida</th></tr>
+            <tr><td>7000</td><td class="S275H">S275H</td><td>20</td><td>20</td><td>8</td><td style="color:green">50%</td></tr>
+            <tr><td>8000</td><td class="S275H">S275H</td><td>14</td><td>14</td><td>8</td><td style="color:green">80%</td></tr>
+            <tr><td>10900</td><td class="S275H">S275H</td><td>15</td><td style="color:#ff0000">2</td><td>8</td><td style="color:red">100%</td></tr>
+            <tr><td>11200</td><td class="S275TI">S275TI</td><td>20</td><td>20</td><td>8</td><td style="color:#c4aa08">90%</td></tr>
+            <tr><td>12100</td><td class="S355V">S355V</td><td>16</td><td style="color:#ff0000">12</td><td>8</td><td style="color:red">110%</td></tr>
+        </table>
+
+
+        <div>
+            <table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; width: 100%; text-align: center;">
+                <thead>
+                    <tr style="background-color: #f5f5f5; font-weight: bold;">
+                        <th>Indicador</th>
+                        <th>Versión 1</th>
+                        <th>Versión 2</th>
+                        <th>Versión 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Versioens de Corte</td>
+                        <td>A1, B1, C1, D1</td>
+                        <td>A2, B2, C3, D4</td>
+                        <td>A3, B1, C1, D3</td>
+                    </tr>
+                    <tr>
+                        <td>% Ajuste por calidad</td>
+                        <td>92%</td>
+                        <td>83%</td>
+                        <td>97%</td>
+                    </tr>
+                    <tr>
+                        <td>% Ajuste por medida</td>
+                        <td>85%</td>
+                        <td>91%</td>
+                        <td>76%</td>
+                    </tr>
+                    <tr>
+                        <td>Cambios de calidad</td>
+                        <td>⭐ 0</td>
+                        <td>1</td>
+                        <td>⭐ 0</td>
+                    </tr>
+                    <tr>
+                        <td>Yield estimado</td>
+                        <td>96.8%</td>
+                        <td>95.1%</td>
+                        <td>97.2%</td>
+                    </tr>
+                    <tr>
+                        <td>Nº tundish consumidos</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>⭐ 2</td>
+                    </tr>
+                    <tr>
+                        <td>Déficit por calidad</td>
+                        <td>15 Tn</td>
+                        <td>⭐ 0 Tn</td>
+                        <td>25 Tn</td>
+                    </tr>
+                    <tr>
+                        <td>Sobreproducción</td>
+                        <td>22 Tn</td>
+                        <td>40 Tn</td>
+                        <td>12 Tn</td>
+                    </tr>
+                    <tr>
+                        <td>Ubicaciones Saturadas</td>
+                        <td>2</td>
+                        <td>⭐ 0</td>
+                        <td>4</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Score global</strong></td>
+                        <td><strong>8.7</strong></td>
+                        <td><strong>8.3</strong></td>
+                        <td><strong>8.5</strong></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="activarCorte('tundishc4','D3')">Activar</button></td>
+                        <td><button onclick="activarCorte('tundishc4','D3')">Activar</button></td>
+                        <td><button onclick="activarCorte('tundishc4','D3')">Activar</button></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="activarCorte('tundishc4','D3')">Crear Nueva Versión</button></td>
+                        <td><button onclick="activarCorte('tundishc4','D3')">Crear Nueva Versión</button></td>
+                        <td><button onclick="activarCorte('tundishc4','D3')">Crear Nueva Versión</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<div class="modal-backdrop; overlay" id="modalBackdrop" style="display:none;">
+    <div class="modal">
+        <div class="modal-title">⚠️ Colada adicional</div>
+        <div class="modal-body">
+            Se va a crear una <strong>colada adicional</strong> y se deberá <strong>configurar los cortes</strong>.
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="crearColadaAdicional()">Aceptar</button>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" style="display:none;" id="coladasContainer">
+        <div class="modalCortes">
+        <div class="modal-title">⚠️ Colada adicional - Configuración de cortes</div>
+        <div class="modal-body" id="cortes">
+        <table class="tabla-cortes">
+        <thead>
+            <tr>
+            <th>Perfil</th>
+            <th>Línea</th>
+            <th>Longitud</th>
+            <th>Barras</th>
+            <th>Tn. Totales</th>
+            </tr>
+        </thead>
+            <tbody>
+
+                <tr class="BB1">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>1</td>
+                <td><input type="number" value="8000"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr class="BB1">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>2</td>
+                <td><input type="number" value="8000"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr class="BB1">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>3</td>
+                <td><input type="number" value="8000"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr>
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>4</td>
+                <td><input type="number" value="0"></td>
+                <td><input type="number" value="0"></td>
+                <td><input type="number" value="0.00"></td>
+                </tr>
+
+                <tr class="BB2">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>5</td>
+                <td><input type="number" value="11900"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr class="BB2">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>6</td>
+                <td><input type="number" value="11900"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr class="BB1">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>1</td>
+                <td><input type="number" value="10800"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr class="BB1">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>2</td>
+                <td><input type="number" value="10800"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                <tr class="BB3">
+                <td>                
+                    <select data-state>
+                        <option selected>BB1</option>
+                        <option>BB2</option>
+                        <option>BB3</option>
+                    </select>
+                </td>
+                <td>3</td>
+                <td><input type="number" value="10800"></td>
+                <td><input type="number" value="5"></td>
+                <td><input type="number" value="14.00" step="0.01"></td>
+                </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModalCortes()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="">Guardar</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+    <script>
+        function togglePanel(id) {
+            var panel = document.getElementById(id);
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+        }
+        function activarCorte(tundishId, corteId) {
+            var cortes = document.querySelectorAll('#' + tundishId + ' tr[data-corte]');
+            cortes.forEach(function (row) {
+                var estadoCell = row.querySelector('.estado');
+                if (row.getAttribute('data-corte') === corteId) {
+                    estadoCell.innerHTML = '<span class="semaforo verde"></span>';
+                    row.classList.add('activo');
+                } else {
+                    estadoCell.innerHTML = '<span class="semaforo rojo"></span>';
+                    row.classList.remove('activo');
+                }
+            });
+        }
+    </script>
+<script>
+
+    function finalizarTundish(btn) {
+        const header = btn.closest('.tundish-header');
+
+        // Cambiar texto y color
+        header.style.background = '#6c757d'; // gris finalizado
+        header.innerHTML = header.innerHTML
+            .replace('(Activo)', '(Finalizado)')
+            .replace(/✅ Finalizar.*$/, '✅ Finalizado');
+
+        // (opcional) aquí puedes lanzar llamada backend / API
+        console.log('Tundish finalizado');
+    }
+</script>
+<script>
+    const input = document.getElementById('coladasExtra');
+    const modal = document.getElementById('modalBackdrop');
+    const coladasContainer = document.getElementById('coladasContainer');
+
+    // guardamos valor anterior
+    input.dataset.prev = input.value;
+
+    // cuando cambie, si sube => modal
+    input.addEventListener('change', () => {
+        const prev = parseInt(input.dataset.prev || input.value, 10) || 0;
+        const now = parseInt(input.value, 10) || 0;
+        if (now > prev) {
+            // guardo cuántas coladas extra hay que crear
+            input.dataset.toAdd = String(now - prev);
+            abrirModal();
+        }
+
+        input.dataset.prev = input.value;
+    });
+
+
+
+
+    function crearColadaAdicional() {
+        // Calcula próximo nº colada basado en las existentes (simple)
+        const existentes = coladasContainer.querySelectorAll('[data-colada]').length;
+        const num = existentes + 1;
+        const div = document.createElement('div');
+        div.className = 'colada-extra';
+        div.setAttribute('data-colada', String(num));
+        cerrarModal();
+        coladasContainer.style.display = "block";
+    
+    }
+
+    function configurarCorte(numColada) {
+        alert("Abrir pantalla / modal de configuración de corte para Colada " + numColada);
+        // Aquí engancharías tu navegación real a la pantalla de cortes
+    }
+
+    function abrirModal() {
+        const modal = document.getElementById('modalBackdrop');
+        if (!modal) return console.warn("No existe #modalBackdrop");
+        modal.style.display = "block";
+    }
+    function cerrarModal() {
+        const modal = document.getElementById('modalBackdrop');
+        if (!modal) return console.warn("No existe #modalBackdrop");
+        modal.style.display = "none";
+    }
+
+    function cerrarModalCortes() {
+        const modal = document.getElementById('coladasContainer');
+        if (!modal) return console.warn("No existe #coladasContainer");
+        modal.style.display = "none";
+    }
+    function confirmarColadaAdicional() {
+        const toAdd = parseInt(input.dataset.toAdd || "0", 10) || 0;
+
+        for (let i = 0; i < toAdd; i++) {
+            crearColadaAdicional();
+        }
+
+        cerrarModal();
+    }
+</script>
