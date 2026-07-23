@@ -7,6 +7,18 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "https://localhost:43835;http://localhost:43836"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://+:8080"
+      },
+      "containerRunArguments": "-p 5000:8080",
+      "useSSL": false,
+      "containerName": "GPB_Aceria"
     }
   }
 }
